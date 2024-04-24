@@ -1,6 +1,5 @@
 import React from 'react';
 
-import LeftPanelPageTabsInsert from '../LeftPanelPageTabsInsert/LeftPanelPageTabsInsert';
 import LeftPanelPageTabsRotate from '../LeftPanelPageTabsRotate/LeftPanelPageTabsRotate';
 import LeftPanelPageTabsOperations from '../LeftPanelPageTabsOperations/LeftPanelPageTabsOperations';
 import CustomLeftPanelOperations from '../CustomLeftPanelOperations/CustomLeftPanelOperations';
@@ -41,7 +40,6 @@ function LeftPanelPageTabsLarge(props) {
     <div className={'PageControlContainer root'}>
       <InitialLeftPanelPageTabs pageNumbers={pageNumbers} multiPageManipulationControlsItems={multiPageManipulationControlsItems} >
         <LeftPanelPageTabsRotate onRotateClockwise={onRotateClockwise} onRotateCounterClockwise={onRotateCounterClockwise} dataElement="leftPanelPageTabsRotate" />
-        <LeftPanelPageTabsInsert onInsert={onInsert} dataElement="leftPanelPageTabsInsert" />
         <LeftPanelPageTabsOperations onReplace={onReplace} onExtractPages={onExtractPages} onDeletePages={onDeletePages} dataElement="leftPanelPageTabsOperations" />
         <LeftPanelPageTabsMove moveToTop={moveToTop} moveToBottom={moveToBottom} dataElement="leftPanelPageTabsMove" />
       </InitialLeftPanelPageTabs>

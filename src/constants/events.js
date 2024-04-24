@@ -64,6 +64,9 @@ export default {
   'MULTI_VIEWER_READY': 'multiViewerReady',
   'COMPARE_ANNOTATIONS_LOADED': 'compareAnnotationsLoaded',
   'TAB_MANAGER_READY': 'onTabManagerReady',
+  'BSS_PAGE_ROTATED': 'bsPageRotated',
+  'BSS_PAGE_REORDERED': 'bsPagesReordered',
+  'BSS_PAGE_REMOVED': 'bsPageRemoved',
 };
 
 /**

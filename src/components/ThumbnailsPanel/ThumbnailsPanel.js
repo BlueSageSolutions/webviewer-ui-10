@@ -408,7 +408,9 @@ const ThumbnailsPanel = ({ panelSelector, parentDataElement }) => {
         const draggingSelectedPage = selectedPageIndexes.some((i) => i === currentPageIndex);
         const pageNumbersToMove = draggingSelectedPage ? selectedPageIndexes.map((i) => i + 1) : [currentPage];
         afterMovePageNumber.current = targetPageNumber - pageNumbersToMove.filter((p) => p < targetPageNumber).length;
-        core.movePages(pageNumbersToMove, targetPageNumber);
+        core.movePages(pageNumbersToMove, targetPageNumber).then(() => {
+          fireEvent(Events.BSS_PAGE_REORDERED, { pageNumbersToMove, targetPageNumber });
+        });
         const updatedPagesNumbers = [];
         for (let offset = 0; offset < pageNumbersToMove.length; offset++) {
           updatedPagesNumbers.push(afterMovePageNumber.current + offset);

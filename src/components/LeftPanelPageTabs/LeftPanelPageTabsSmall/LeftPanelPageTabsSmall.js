@@ -1,7 +1,6 @@
 import React from 'react';
 import '../LeftPanelPageTabs/LeftPanelPageTabsContainer.scss';
 import LeftPanelPageTabsMoreSmall from '../LeftPanelPageTabsMoreSmall/LeftPanelPageTabsMoreSmall';
-import LeftPanelPageTabsInsertSmall from '../LeftPanelPageTabsInsertSmall/LeftPanelPageTabsInsertSmall';
 import CustomLeftPanelOperations from '../CustomLeftPanelOperations/CustomLeftPanelOperations';
 import LeftPanelPageTabsRotate from '../LeftPanelPageTabsRotate/LeftPanelPageTabsRotate';
 
@@ -41,7 +40,6 @@ function LeftPanelPageTabsSmall(props) {
         <LeftPanelPageTabsRotate onRotateClockwise={onRotateClockwise}
           onRotateCounterClockwise={onRotateCounterClockwise}
           dataElement="leftPanelPageTabsRotate"/>
-        <LeftPanelPageTabsInsertSmall dataElement="leftPanelPageTabsInsertSmall" />
         <LeftPanelPageTabsMoreSmall dataElement="leftPanelPageTabsMoreSmall" />
       </InitialLeftPanelPageTabsSmall>
     </div>

@@ -116,17 +116,6 @@ function MenuOverlay() {
       ariaLabel={t('component.menuOverlay')}
     >
       <InitialMenuOverLayItem>
-        {isOfficeEditorMode() && (
-          <ActionButton
-            dataElement={DataElements.NEW_DOCUMENT_BUTTON}
-            className="row"
-            img="icon-plus-sign"
-            label={t('action.newDocument')}
-            ariaLabel={t('action.newDocument')}
-            role="option"
-            onClick={handleNewDocumentClick}
-          />
-        )}
         <ActionButton
           dataElement={DataElements.FILE_PICKER_BUTTON}
           className="row"
@@ -158,17 +147,6 @@ function MenuOverlay() {
             onClick={toggleFullscreen}
           />
         )}
-        {documentType !== workerTypes.XOD && (
-          <ActionButton
-            dataElement={DataElements.SAVE_AS_BUTTON}
-            className="row"
-            img="icon-save"
-            label={t('saveModal.saveAs')}
-            ariaLabel={t('saveModal.saveAs')}
-            role="option"
-            onClick={openSaveModal}
-          />
-        )}
         <ActionButton
           dataElement={DataElements.PRINT_BUTTON}
           className="row"
@@ -180,20 +158,6 @@ function MenuOverlay() {
         />
       </InitialMenuOverLayItem>
       <div className="divider"></div>
-      {isCreatePortfolioButtonEnabled && (
-        <>
-          <ActionButton
-            dataElement={DataElements.CREATE_PORTFOLIO_BUTTON}
-            className="row"
-            img="icon-pdf-portfolio"
-            label={t('portfolio.createPDFPortfolio')}
-            ariaLabel={t('portfolio.createPDFPortfolio')}
-            role="option"
-            onClick={handlePortfolioButtonClick}
-          />
-          <div className="divider"></div>
-        </>
-      )}
       <ActionButton
         dataElement={DataElements.SETTINGS_BUTTON}
         className="row"

@@ -7,6 +7,8 @@ import { workerTypes } from 'constants/types';
 import { redactionTypeMap } from 'constants/redactionTypes';
 import DataElements from 'constants/dataElement';
 import { createAnnouncement } from './accessibility';
+import Events from 'constants/events';
+import fireEvent from 'helpers/fireEvent';
 
 const getNewRotation = (curr, counterClockwise = false) => {
   const { E_0, E_90, E_180, E_270 } = window.Core.PageRotation;
@@ -36,8 +38,12 @@ const canRotateLoadedDocument = () => {
 const rotatePages = (pageNumbers, counterClockwise) => {
   if (canRotateLoadedDocument()) {
     const rotation = counterClockwise ? window.Core.PageRotation.E_270 : window.Core.PageRotation.E_90;
+    const rotatePromises = [];
     pageNumbers.forEach((index) => {
-      core.rotatePages([index], rotation);
+      rotatePromises.push(core.rotatePages([index], rotation));
+    });
+    Promise.all(rotatePromises).then(() => {
+      fireEvent(Events.BSS_PAGE_ROTATED, pageNumbers);
     });
   } else {
     const docViewer = core.getDocumentViewer();
@@ -117,6 +123,7 @@ const deletePages = (pageNumbers, dispatch, isModalEnabled = true) => {
         dispatch(actions.setSelectedPageThumbnails([]));
         dispatch(actions.setShiftKeyThumbnailsPivotIndex());
         createAnnouncement(deleteAnnouncement);
+        fireEvent(Events.BSS_PAGE_REMOVED, pageNumbers);
       }),
     };
 
@@ -142,12 +149,16 @@ const deletePages = (pageNumbers, dispatch, isModalEnabled = true) => {
 };
 
 const movePagesToBottom = (pageNumbers) => {
-  core.movePages(pageNumbers, core.getTotalPages() + 1);
+  core.movePages(pageNumbers, core.getTotalPages() + 1).then(() => {
+    fireEvent(Events.BSS_PAGE_REORDERED, { pageNumbersToMove: pageNumbers, targetPageNumber: core.getTotalPages() + 1 });
+  });
   createAnnouncement(`${i18next.t('action.page')} ${pageNumbers} ${i18next.t('action.movedToBottomOfDocument')}`);
 };
 
 const movePagesToTop = (pageNumbers) => {
-  core.movePages(pageNumbers, 0);
+  core.movePages(pageNumbers, 0).then(() => {
+    fireEvent(Events.BSS_PAGE_REORDERED, { pageNumbersToMove: pageNumbers, targetPageNumber: 0 });
+  });
   createAnnouncement(`${i18next.t('action.page')} ${pageNumbers} ${i18next.t('action.movedToTopofDocument')}`);
 };
 
