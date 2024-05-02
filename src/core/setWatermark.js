@@ -1,6 +1,4 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.DocumentViewer.html#setWatermark__anchor
+ * https://www.pdftron.com/api/web/CoretViewer.html#setWatermark__anchor
  */
-export default (watermarkOptions, documentViewerKey = 1) => core.getDocumentViewer(documentViewerKey).setWatermark(watermarkOptions);
+export default watermarkOptions => window.documentViewer.setWatermark(watermarkOptions);

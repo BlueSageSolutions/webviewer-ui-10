@@ -4,7 +4,7 @@ import core from 'core';
 import DataElements from 'constants/dataElement';
 import DataElementWrapper from '../DataElementWrapper';
 import { getAnnotationPopupPositionBasedOn } from 'helpers/getPopupPosition';
-import { isMobileDevice } from 'helpers/device';
+import { isMobileSize } from 'helpers/getDeviceSize';
 import LinkAnnotationPopup from './LinkAnnotationPopup';
 import PropTypes from 'prop-types';
 import selectors from 'selectors';
@@ -126,7 +126,7 @@ const LinkAnnotationPopupContainer = ({
         linkText={contents}
         handleUnLink={handleUnLink}
         isAnnotation={isAnnotation}
-        isMobileDevice={isMobileDevice}
+        isMobileDevice={isMobileSize()}
         handleOnMouseEnter={handleOnMouseEnter}
         handleOnMouseLeave={handleOnMouseLeave}
         handleMouseMove={handleMouseMove}

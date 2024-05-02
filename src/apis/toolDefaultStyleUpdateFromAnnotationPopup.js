@@ -1,4 +1,5 @@
-import actions from 'actions';
+// this property does not have to do with rendering so it doesn't need to be in redux
+let toolDefaultStyleUpdateFromAnnotationPopupEnabled = true;
 
 /**
  * Enables syncing of annotation style updates to the associated tool that created the annotation.
@@ -10,9 +11,9 @@ WebViewer(...)
     instance.UI.enableToolDefaultStyleUpdateFromAnnotationPopup();
   });
  */
-export const enableToolDefaultStyleUpdateFromAnnotationPopup = (store) => () => {
-  store.dispatch(actions.setToolDefaultStyleUpdateFromAnnotationPopupEnabled(true));
-};
+export function enableToolDefaultStyleUpdateFromAnnotationPopup() {
+  toolDefaultStyleUpdateFromAnnotationPopupEnabled = true;
+}
 
 /**
  * Disables syncing of annotation style updates to the associated tool that created the annotation.
@@ -24,6 +25,10 @@ WebViewer(...)
     instance.UI.disableToolDefaultStyleUpdateFromAnnotationPopup();
   });
  */
-export const disableToolDefaultStyleUpdateFromAnnotationPopup = (store) => () => {
-  store.dispatch(actions.setToolDefaultStyleUpdateFromAnnotationPopupEnabled(false));
-};
+export function disableToolDefaultStyleUpdateFromAnnotationPopup() {
+  toolDefaultStyleUpdateFromAnnotationPopupEnabled = false;
+}
+
+export function isToolDefaultStyleUpdateFromAnnotationPopupEnabled() {
+  return toolDefaultStyleUpdateFromAnnotationPopupEnabled;
+}

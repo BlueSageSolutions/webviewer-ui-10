@@ -16,11 +16,9 @@ import './ReplyAreaMultiSelect.scss';
 const ReplyArea = ({ annotations, onSubmit, onClose }) => {
   const [
     isMentionEnabled,
-    activeDocumentViewerKey,
   ] = useSelector(
     (state) => [
       selectors.getIsMentionEnabled(state),
-      selectors.getActiveDocumentViewerKey(state),
     ],
     shallowEqual
   );
@@ -44,15 +42,31 @@ const ReplyArea = ({ annotations, onSubmit, onClose }) => {
       return;
     }
     annotations.forEach((annotation) => {
+      const annotationHasNoContents = annotation.getContents() === '' || annotation.getContents() === undefined;
       if (isMentionEnabled) {
-        const replyAnnotation = mentionsManager.createMentionReply(annotation, replyText);
-        core.addAnnotations([replyAnnotation], activeDocumentViewerKey);
-        setAnnotationRichTextStyle(editor, replyAnnotation);
+        if (annotationHasNoContents) {
+          const { plainTextValue, ids } = mentionsManager.extractMentionDataFromStr(replyText);
+
+          annotation.setCustomData('trn-mention', JSON.stringify({
+            contents: replyText,
+            ids,
+          }));
+          core.setNoteContents(annotation, plainTextValue);
+        } else {
+          const replyAnnotation = mentionsManager.createMentionReply(annotation, replyText);
+          core.addAnnotations([replyAnnotation]);
+          setAnnotationRichTextStyle(editor, replyAnnotation);
+        }
       } else {
-        // TODO: This is bugged and does not work. createAnnotationReply
-        // does not return an annotation
-        const replyAnnotation = core.createAnnotationReply(annotation, replyText, activeDocumentViewerKey);
-        setAnnotationRichTextStyle(editor, replyAnnotation);
+        if (annotationHasNoContents) {
+          core.setNoteContents(annotation, replyText);
+          setAnnotationRichTextStyle(editor, annotation);
+        } else {
+          // TODO: This is bugged and does not work. createAnnotationReply
+          // does not return an annotation
+          const replyAnnotation = core.createAnnotationReply(annotation, replyText);
+          setAnnotationRichTextStyle(editor, replyAnnotation);
+        }
       }
     });
 

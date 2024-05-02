@@ -50,7 +50,6 @@ const createStylePopupTest = (colorMapKey, additionalProps = {}) => {
     Opacity: 20,
     StrokeThickness: 0,
     FontSize: '20pt',
-    StrokeStyle: 'sold',
   };
   const { container } = render(<StylePopupWithRedux
     hideSnapModeCheckbox={false}
@@ -61,7 +60,6 @@ const createStylePopupTest = (colorMapKey, additionalProps = {}) => {
     onSliderChange={noop}
     disableSeparator
     onRichTextStyleChange={noop}
-    onLineStyleChange={noop}
     {...additionalProps}
   />);
 
@@ -99,7 +97,6 @@ describe('StylePopup component', () => {
         italic: false,
         underline: false,
         strikeout: false,
-        StrokeStyle: 'sold',
       },
       isFreeText: true
     });
@@ -124,6 +121,7 @@ describe('StylePopup component', () => {
     expect(menuItems.length).toBe(0);
     expect(header).toBeInTheDocument();
     expect(sliders).toBeInTheDocument();
+    expect(styles).toBeInTheDocument();
     expect(sliders.children.length).toBeGreaterThanOrEqual(1);
     expect(palletePicker).toBeInTheDocument();
   });

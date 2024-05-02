@@ -24,6 +24,9 @@ const FilePickerButton = (props) => {
   );
 
   if (isDisabled) {
+    if (isFlyoutItem) {
+      return null;
+    }
     console.warn('The file picker preset button should be enabled with the enableFilePicker option in the WebViewer constructor.');
   }
 

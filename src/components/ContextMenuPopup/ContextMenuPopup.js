@@ -27,27 +27,19 @@ const OfficeActionItem = ({ dataElement, onClick, img, title, shortcut = '', dis
     if (e.key === 'Enter' && !disabled) {
       onClick();
       dispatch(actions.closeElement(DataElements.CONTEXT_MENU_POPUP));
-      focusOfficeEditorContent();
-    }
-  };
-
-  const focusOfficeEditorContent = () => {
-    if (isOfficeEditorMode()) {
-      // setTimeout needed because the focus can not be set immediately
-      setTimeout(() => {
-        core.getViewerElement().focus();
-      });
     }
   };
 
   return (
     <div
       className={classNames('office-action-item', { disabled })}
-      onClick={() => {
+      onClick={(e) => {
         if (!disabled) {
           onClick();
-          focusOfficeEditorContent();
+          dispatch(actions.closeElement(DataElements.CONTEXT_MENU_POPUP));
         }
+        // prevent bubbling up click event to control when context menu is closed within this component
+        e.stopPropagation();
       }}
       tabIndex={disabled ? -1 : 0}
       data-element={dataElement}

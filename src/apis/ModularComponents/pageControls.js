@@ -13,7 +13,7 @@ class PageControls extends Item {
   constructor(props = {}) {
     super(props);
     this.type = ITEM_TYPE.PAGE_CONTROLS;
-    this.dataElement = 'page-controls-container';
+    this._dataElement = 'page-controls-container';
   }
 }
 

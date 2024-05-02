@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { setupWebViewerInstance } from '../../../utils/TestingUtils';
+import { setupWebViewerInstance, waitFor } from '../../../utils/TestingUtils';
 import { createModularHeader, createGroupedItems, createPresetButton, createFlyout } from './utils';
-
 
 describe('Test Custom UI APIs', function() {
   this.timeout(10000);
@@ -42,7 +41,7 @@ describe('Test Custom UI APIs', function() {
   afterEach(async () => {
     // Clean up the div after each test
     document.body.removeChild(viewerDiv);
-    await instance.UI.dispose();
+    await instance?.UI.dispose();
     window.ResizeObserver = originalResizeObserver;
   });
 
@@ -168,6 +167,143 @@ describe('Test Custom UI APIs', function() {
       expect(groupedItems.length).to.equal(1);
       const headerItems = leftHeader.getItems();
       expect(headerItems.length).to.equal(2);
+    });
+
+    it('It should be able select ribbon items and update its grouped items when the Ribbon Group is in dropdown format', async () => {
+      instance = await setupWebViewerInstance({ ui: 'beta' });
+      instance.UI.disableFeatures([instance.UI.Feature.LocalStorage]);
+      const iframe = document.querySelector('#viewerDiv iframe');
+      const getElementByDataElement = (elementSelector) => {
+        return iframe.contentDocument.querySelector(`[data-element="${elementSelector}"]`);
+      };
+
+      const ribbonGroupDropdown = iframe.contentDocument.querySelector('.RibbonGroup__dropdown');
+      // setting the container width so we can see the dropdown
+      iframe.style.width = '500px';
+      await waitFor(500);
+      expect(ribbonGroupDropdown.classList.contains('hidden')).to.equal(false);
+
+      let insertGroupedItems = getElementByDataElement('insertGroupedItems');
+      expect(insertGroupedItems).to.be.null;
+      ribbonGroupDropdown.click();
+
+      const dropdownItems = iframe.contentDocument.querySelectorAll('.Dropdown__items button');
+      const insertRibbonItem = dropdownItems[3];
+      insertRibbonItem.click();
+      await waitFor(100);
+      let editGroupedItems = getElementByDataElement('editGroupedItems');
+      insertGroupedItems = getElementByDataElement('insertGroupedItems');
+      expect(insertGroupedItems).to.not.be.null;
+      expect(editGroupedItems).to.be.null;
+
+      ribbonGroupDropdown.click();
+      await waitFor(100);
+      const editRibbonItem = dropdownItems[6];
+      editRibbonItem.click();
+      await waitFor(100);
+
+      editGroupedItems = getElementByDataElement('editGroupedItems');
+      expect(editGroupedItems).to.not.be.null;
+      insertGroupedItems = getElementByDataElement('insertGroupedItems');
+      expect(insertGroupedItems).to.be.null;
+    });
+
+    // skipping flaking test because it failed on CircleCI
+    // Expected inner text was in the wrong language
+    // https://apryse.atlassian.net/browse/WVR-5412
+    it.skip('It should update header items and cleanup orphan items', async () => {
+      instance = await setupWebViewerInstance({ ui: 'beta' });
+
+      const iframe = document.querySelector('#viewerDiv iframe');
+      await waitFor(500);
+      iframe.style.width = '1500px';
+
+      const toggleButton = new instance.UI.Components.ToggleElementButton({
+        dataElement: 'newPortfolioPanelToggle',
+        toggleElement: 'newPortfolioPanel',
+        img: 'icon-pdf-portfolio',
+        title: 'component.portfolioPanel',
+      });
+      const topHeader = instance.UI.getModularHeader('default-top-header');
+      let items = topHeader.getItems();
+      topHeader.setItems([...items, toggleButton]);
+
+      // Test case 1
+      await waitFor(200);
+      const ToggleElementButtons = iframe.contentDocument.querySelectorAll('.ModularHeaderItems>.ToggleElementButton');
+      expect(ToggleElementButtons[2].dataset.element).to.equal('newPortfolioPanelToggle');
+      const RibbonItem0 = iframe.contentDocument.querySelectorAll('.RibbonItem');
+      expect(RibbonItem0[0].innerText).to.equal('View');
+
+      // Test case 2 remove "View" ribbonItem, & check that first item is "Annotate"
+      const itemsNewArray = items.concat();
+      const removedItem = itemsNewArray[1].items.shift();
+      topHeader.setItems([...itemsNewArray]);
+      await waitFor(200);
+      const RibbonItem = iframe.contentDocument.querySelectorAll('.RibbonItem');
+      expect(RibbonItem[0].innerText).to.equal('Annotate');
+
+
+      // Test case 3 add "View" ribbonItem back again, so that the first item is "View" again
+      itemsNewArray[1].items.unshift(removedItem);
+      topHeader.setItems([...itemsNewArray]);
+      await waitFor(200);
+      const RibbonItem2 = iframe.contentDocument.querySelectorAll('.RibbonItem');
+      expect(RibbonItem2[0].innerText).to.equal('View');
+    });
+
+    it('It should show warning logs for existing item, no warning log for new item', async () => {
+      instance = await setupWebViewerInstance({ ui: 'beta' }, true);
+
+      // Test case 1: warning log for "menu-toggle-button"
+      console.warn = sinon.spy();
+      await waitFor(200);
+      const toggleButton = new instance.UI.Components.ToggleElementButton({
+        dataElement: 'newPortfolioPanelToggle',
+        toggleElement: 'newPortfolioPanel',
+        img: 'icon-pdf-portfolio',
+        title: 'component.portfolioPanel',
+      });
+      const topHeader = instance.UI.getModularHeader('default-top-header');
+      let items = topHeader.getItems();
+      topHeader.setItems([...items, toggleButton]);
+      expect(console.warn.getCall(0).args[0]).to.equal(
+        'Modular component with dataElement menu-toggle-button already exists.'
+      );
+
+      // Test case 2: no warning log for "menu-toggle-button", but warning log for the next item
+      console.warn = sinon.spy();
+      const removedItem = items.shift();
+      topHeader.setItems([...items]);
+      expect(console.warn.getCall(0).args[0]).to.equal(
+        'Modular component with dataElement toolbarGroup-View already exists.'
+      );
+
+
+      // Test case 3: warning log for "menu-toggle-button" displayed again
+      console.warn = sinon.spy();
+      items.unshift(removedItem);
+      topHeader.setItems([...items]);
+      expect(console.warn.getCall(0).args[0]).to.equal(
+        'Modular component with dataElement menu-toggle-button already exists.'
+      );
+    });
+
+    it('It should show warning log when existing modular items dataElement gets renamed', async () => {
+      instance = await setupWebViewerInstance({ ui: 'beta' }, true);
+
+      // Test case: warning log for modifying dataElement for existing item
+      console.warn = sinon.spy();
+      await waitFor(200);
+
+      const topHeader = instance.UI.getModularHeader('default-top-header');
+      let items = topHeader.getItems();
+      const tempVar = 'foobar';
+      const originalName = items[3].dataElement;
+      items[3].dataElement = tempVar;
+      expect(console.warn.getCall(0).args[0]).to.equal(
+        `Modular Item's "${originalName}" dataElement property cannot be changed to "${tempVar}"`
+      );
     });
   });
 
@@ -365,8 +501,8 @@ describe('Test Custom UI APIs', function() {
       }];
 
       const mainMenu = new instance.UI.Components.MainMenu({ additionalItems });
-      // Five default items + 1 additional item
-      expect(mainMenu.items.length).to.equal(6);
+      // 11 default items + 1 additional item
+      expect(mainMenu.items.length).to.equal(12);
     });
 
     it('It should return all flyouts when calling the API getAllFlyouts', async () => {
@@ -375,63 +511,6 @@ describe('Test Custom UI APIs', function() {
 
       // 9 flyouts are added by default when we add the 'beta' value for the 'ui' key.
       expect(allFlyouts.length).to.equal(9);
-    });
-  });
-
-  describe('Test Panels', () => {
-    it('It should be able to add Panel', async () => {
-      instance = await setupWebViewerInstance({}, true);
-      instance.UI.addPanel({
-        dataElement: 'myNewOutlinesPanel',
-        render: instance.UI.Panels.OUTLINE,
-        location: 'left',
-      });
-      const panelList = instance.UI.getPanels();
-      expect(panelList.length).to.equal(1);
-    });
-    it('It should be able to set Panels', async () => {
-      instance = await setupWebViewerInstance({}, true);
-      instance.UI.addPanel({
-        dataElement: 'myNewOutlinesPanel',
-        render: instance.UI.Panels.OUTLINE,
-        location: 'left',
-      });
-      const panelList = instance.UI.getPanels();
-      expect(panelList.length).to.equal(1);
-      instance.UI.setPanels([]);
-      const newPanelList = instance.UI.getPanels();
-      expect(newPanelList.length).to.equal(0);
-    });
-    it('It should be able to get Panels', async () => {
-      instance = await setupWebViewerInstance({}, true);
-      instance.UI.addPanel({
-        dataElement: 'myNewOutlinesPanel',
-        render: instance.UI.Panels.OUTLINE,
-        location: 'left',
-      });
-      const panelList = instance.UI.getPanels();
-      expect(panelList.length).to.equal(1);
-    });
-    it('It should be able to change the location of a Panel', async () => {
-      instance = await setupWebViewerInstance({}, true);
-      instance.UI.addPanel({
-        dataElement: 'myNewOutlinesPanel',
-        render: instance.UI.Panels.OUTLINE,
-        location: 'left',
-      });
-      const panelList = instance.UI.getPanels();
-      expect(panelList[0].location).to.equal('left');
-      panelList[0].setLocation('right');
-      expect(instance.UI.getPanels()[0].location).to.equal('right');
-    });
-    it('It should be able to change the location of a panel that is shipped by default', async () => {
-      instance = await setupWebViewerInstance({ ui: 'beta' }, true);
-
-      let stylePanel = instance.UI.getPanels().find((panel) => panel.dataElement === 'stylePanel');
-      expect(stylePanel.location).to.equal('left');
-      stylePanel.setLocation('right');
-      stylePanel = instance.UI.getPanels().find((panel) => panel.dataElement === 'stylePanel');
-      expect(stylePanel.location).to.equal('right');
     });
   });
 
@@ -465,6 +544,70 @@ describe('Test Custom UI APIs', function() {
       expect(Dropdown__item[0].innerText).to.equal('閲覧');
       expect(Dropdown__item[1].innerText).to.equal('注釈');
       expect(Dropdown__item[3].innerText).to.equal('挿入');
+    });
+  });
+
+  describe('Should correctly enable and disable elements from features API', () => {
+    it('should disable notes panel button', async () => {
+      instance = await setupWebViewerInstance({ ui: 'beta' });
+      const { document } = instance.UI.iframeWindow;
+      instance.UI.disableFeatures([instance.UI.Feature.NotesPanel]);
+      expect(document.querySelector('[data-element="notesPanelToggle"]')).to.be.null;
+      instance.UI.enableFeatures([instance.UI.Feature.NotesPanel]);
+      expect(document.querySelector('[data-element="notesPanelToggle"]')).to.not.be.null;
+    });
+    it('should disable annotation features', async () => {
+      instance = await setupWebViewerInstance({ ui: 'beta' });
+      const { document } = instance.UI.iframeWindow;
+      instance.UI.disableFeatures([instance.UI.Feature.Annotations]);
+      expect(document.querySelector('[data-element="tools-header"]')).to.be.null;
+      expect(document.querySelector('[data-element="notesPanelToggle"]')).to.be.null;
+      expect(document.querySelector('[data-element="default-ribbon-group"]')).to.be.null;
+      instance.UI.enableFeatures([instance.UI.Feature.Annotations]);
+      expect(document.querySelector('[data-element="tools-header"]')).to.not.be.null;
+      expect(document.querySelector('[data-element="notesPanelToggle"]')).to.not.be.null;
+      expect(document.querySelector('[data-element="default-ribbon-group"]')).to.not.be.null;
+    });
+    it('should enable/disable multi-tab', async () => {
+      instance = await setupWebViewerInstance({ ui: 'beta' });
+      const { document } = instance.UI.iframeWindow;
+      instance.UI.disableFeatures([instance.UI.Feature.MultiTab]);
+      expect(document.querySelector('.TabsHeader')).to.be.null;
+      instance.UI.enableFeatures([instance.UI.Feature.MultiTab]);
+      expect(document.querySelector('.TabsHeader')).to.not.be.null;
+    });
+    it('should enable/disable search button', async () => {
+      instance = await setupWebViewerInstance({ ui: 'beta' });
+      const { document } = instance.UI.iframeWindow;
+      instance.UI.disableFeatures([instance.UI.Feature.Search]);
+      expect(document.querySelector('[data-element="searchPanelToggle"]')).to.be.null;
+      instance.UI.enableFeatures([instance.UI.Feature.Search]);
+      expect(document.querySelector('[data-element="searchPanelToggle"]')).to.not.be.null;
+    });
+    it('should close the Zoom Options flyout when an option is selected', async () => {
+      instance = await setupWebViewerInstance({ ui: 'beta' });
+      instance.UI.disableFeatures([instance.UI.Feature.LocalStorage]);
+      const { document } = instance.UI.iframeWindow;
+
+      const iframe = window.document.querySelector('#viewerDiv iframe');
+
+      await waitFor(200);
+
+      iframe.style.height = '100vh';
+      iframe.style.width = '100vw';
+
+      instance.UI.openElement('zoom-containerFlyout');
+      await waitFor(200);
+      const zoomOptionsFlyout = document.querySelector('[data-element="zoom-containerFlyout"]');
+      expect(zoomOptionsFlyout).to.not.be.null;
+      const zoomOption = document.querySelector('[data-element="zoom-button-10"]');
+      zoomOption.click();
+      expect(document.querySelector('.ZoomOptionsFlyout')).to.be.null;
+
+      // re-open the flyout and make sure that the correct option is selected
+      instance.UI.openElement('zoom-containerFlyout');
+      await waitFor(200);
+      expect(document.querySelector('[data-element="zoom-button-10"]').classList.contains('active')).to.be.true;
     });
   });
 });

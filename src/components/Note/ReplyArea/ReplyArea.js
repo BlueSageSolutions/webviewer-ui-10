@@ -111,9 +111,7 @@ const ReplyArea = ({ annotation, isUnread, onPendingReplyChange }) => {
       const lastNewLineCharacterLength = 1;
       const textLength = editor.getLength() - lastNewLineCharacterLength;
       setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.editor.setSelection(textLength, textLength);
-        }
+        textareaRef.current.editor.setSelection(textLength, textLength);
       }, 100);
     }
   }, []);
@@ -130,16 +128,32 @@ const ReplyArea = ({ annotation, isUnread, onPendingReplyChange }) => {
       return;
     }
 
+    const annotationHasNoContents = !annotation.getContents();
     if (isMentionEnabled) {
-      const replyAnnotation = mentionsManager.createMentionReply(annotation, replyText);
-      setAnnotationRichTextStyle(editor, replyAnnotation);
-      await setAnnotationAttachments(replyAnnotation, pendingAttachmentMap[annotation.Id]);
-      core.addAnnotations([replyAnnotation], activeDocumentViewerKey);
+      if (annotationHasNoContents && isContentEditable) {
+        const { plainTextValue, ids } = mentionsManager.extractMentionDataFromStr(replyText);
+
+        annotation.setCustomData('trn-mention', JSON.stringify({
+          contents: replyText,
+          ids,
+        }));
+        core.setNoteContents(annotation, plainTextValue, activeDocumentViewerKey);
+      } else {
+        const replyAnnotation = mentionsManager.createMentionReply(annotation, replyText);
+        setAnnotationRichTextStyle(editor, replyAnnotation);
+        await setAnnotationAttachments(replyAnnotation, pendingAttachmentMap[annotation.Id]);
+        core.addAnnotations([replyAnnotation], activeDocumentViewerKey);
+      }
     } else {
-      const replyAnnotation = core.createAnnotationReply(annotation, replyText);
-      setAnnotationRichTextStyle(editor, replyAnnotation);
-      await setAnnotationAttachments(replyAnnotation, pendingAttachmentMap[annotation.Id]);
-      core.getAnnotationManager(activeDocumentViewerKey).trigger('annotationChanged', [[replyAnnotation], 'modify', {}]);
+      if (annotationHasNoContents && isContentEditable) {
+        core.setNoteContents(annotation, replyText, activeDocumentViewerKey);
+        setAnnotationRichTextStyle(editor, annotation);
+      } else {
+        const replyAnnotation = core.createAnnotationReply(annotation, replyText);
+        setAnnotationRichTextStyle(editor, replyAnnotation);
+        await setAnnotationAttachments(replyAnnotation, pendingAttachmentMap[annotation.Id]);
+        core.getAnnotationManager(activeDocumentViewerKey).trigger('annotationChanged', [[replyAnnotation], 'modify', {}]);
+      }
     }
 
     setPendingReply('', annotation.Id);

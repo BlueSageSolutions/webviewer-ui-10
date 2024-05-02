@@ -1,8 +1,8 @@
 import React from 'react';
-import FormFieldEditPopup from './FormFieldEditPopup';
-import { configureStore } from '@reduxjs/toolkit';
+import FormFieldEditPopup from './FormFieldEditPopup'
+import { createStore } from 'redux';
 
-import { Provider } from 'react-redux';
+import { Provider } from "react-redux";
 
 
 export default {
@@ -16,8 +16,11 @@ const initialState = {
     customElementOverrides: {},
   }
 };
+function rootReducer(state = initialState, action) {
+  return state;
+}
 
-const store = configureStore({ reducer: () => initialState });
+const store = createStore(rootReducer);
 
 const fields = [
   {
@@ -56,17 +59,7 @@ const flags = [
 const annotation = {
   Width: 100,
   Height: 100,
-  getCustomData: () => { },
-  getFormFieldPlaceholderType: () => { },
-};
-
-const indicator = {
-  label: 'formField.formFieldPopup.documentFieldIndicator',
-  toggleIndicator: () => { },
-  isChecked: true,
-  onChange: () => { },
-  value: 'This is an indicator'
-};
+}
 
 
 export function Basic() {
@@ -74,13 +67,14 @@ export function Basic() {
     fields,
     flags,
     annotation,
-    indicator
   };
   return (
     <Provider store={store}>
-      <div className="FormFieldEditPopupContainer">
+      <div className='FormFieldEditPopupContainer'>
         <FormFieldEditPopup {...props} />
       </div>
     </Provider>
   );
 }
+
+

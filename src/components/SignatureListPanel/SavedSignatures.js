@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next';
 import Icon from 'components/Icon';
 import classNames from 'classnames';
 import SignatureModes from 'constants/signatureModes';
+import { isMobileSize } from 'helpers/getDeviceSize';
+import { PANEL_SIZES } from 'constants/panel';
+import PropTypes from 'prop-types';
 
 const SignatureRowContent = React.memo(({
   index,
@@ -48,6 +51,7 @@ const SavedSignatures = (props) => {
     currentlySelectedSignature,
     isDeleteDisabled,
     signatureMode,
+    panelSize,
   } = props;
 
   const { t } = useTranslation();
@@ -64,6 +68,8 @@ const SavedSignatures = (props) => {
     );
   };
 
+  const isMobile = isMobileSize();
+
   if (savedSignatures.length > 0) {
     return (<div className='signature-list'>
       {renderSignatureListHeader()}
@@ -72,36 +78,41 @@ const SavedSignatures = (props) => {
           // Need to keep the index information from the original signature list
           .map((signatureObject, index) => [signatureObject, index])
           .map(([{ fullSignature, initials }, savedSignatureIndex]) => {
-            return (<div
-              key={savedSignatureIndex}
-              className="signature-row"
-            >
-              <SignatureRowContent
-                index={savedSignatureIndex}
-                fullSignature={fullSignature}
-                initials={initials}
-                onFullSignatureSetHandler={onFullSignatureSetHandler}
-                onInitialsSetHandler={onInitialsSetHandler}
-                isActive={currentlySelectedSignature === savedSignatureIndex}
-                altText={`${t('option.toolsOverlay.signatureAltText')} ${savedSignatureIndex + 1}`}
-                isHoveredForDeletion={hoveredIndexToDelete === savedSignatureIndex}
-                signatureMode={signatureMode}
-              />
-              {!isDeleteDisabled && (
-                <button
-                  className="icon-button"
-                  data-element="defaultSignatureDeleteButton"
-                  onMouseOver={() => setHoveredIndexToDelete(savedSignatureIndex)}
-                  onMouseLeave={() => setHoveredIndexToDelete(null)}
-                  onClick={() => {
-                    deleteHandler(savedSignatureIndex);
-                    setHoveredIndexToDelete(null);
-                  }}
-                >
-                  <Icon glyph="icon-delete-line" />
-                </button>
-              )}
-            </div>);
+            const isPanelSizeLarge = !panelSize || panelSize !== PANEL_SIZES.SMALL_SIZE;
+            const isMobileSizeWithSmallPanel = isMobile && panelSize === PANEL_SIZES.SMALL_SIZE;
+            if (isPanelSizeLarge || (isMobileSizeWithSmallPanel && currentlySelectedSignature === savedSignatureIndex)) {
+              return (<div
+                key={savedSignatureIndex}
+                className="signature-row"
+              >
+                <SignatureRowContent
+                  index={savedSignatureIndex}
+                  fullSignature={fullSignature}
+                  initials={initials}
+                  onFullSignatureSetHandler={onFullSignatureSetHandler}
+                  onInitialsSetHandler={onInitialsSetHandler}
+                  isActive={currentlySelectedSignature === savedSignatureIndex}
+                  altText={`${t('option.toolsOverlay.signatureAltText')} ${savedSignatureIndex + 1}`}
+                  isHoveredForDeletion={hoveredIndexToDelete === savedSignatureIndex}
+                  signatureMode={signatureMode}
+                />
+                {!isDeleteDisabled && (
+                  <button
+                    className="icon-button"
+                    data-element="defaultSignatureDeleteButton"
+                    onMouseOver={() => setHoveredIndexToDelete(savedSignatureIndex)}
+                    onMouseLeave={() => setHoveredIndexToDelete(null)}
+                    onClick={() => {
+                      deleteHandler(savedSignatureIndex);
+                      setHoveredIndexToDelete(null);
+                    }}
+                  >
+                    <Icon glyph="icon-delete-line" />
+                  </button>
+                )}
+              </div>);
+            }
+            return null;
           })
       }
     </div>);
@@ -110,5 +121,8 @@ const SavedSignatures = (props) => {
 };
 
 SavedSignatures.displayName = 'SavedSignatures';
+SavedSignatures.propTypes = {
+  panelSize: PropTypes.oneOf(Object.values(PANEL_SIZES)),
+};
 
 export default React.memo(SavedSignatures);

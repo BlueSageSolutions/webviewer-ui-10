@@ -26,29 +26,11 @@ const ModalWrapper = (props) => {
 
   return (
     <FocusTrap locked={props.isOpen}>
-      <div
-        className="modal-container"
-        onClick={props.containerOnClick}
-        role="dialog"
-        aria-modal="true"
-        aria-label={t(props.title)}
-        aria-describedby={t(props.title)}
-      >
+      <div className="modal-container" onClick={props.containerOnClick}>
         <div className="wrapper">
           <SwipeableWrapper {...props}>
             <div className="header-container">
-              <div className='left-header'>
-                <h2>{t(props.title)}</h2>
-                {props.backButtonDataElement && (
-                  <Button
-                    className="back-button"
-                    dataElement={props.backButtonDataElement}
-                    title={t('action.back')}
-                    img={'icon-arrow-back'}
-                    onClick={props.onBackClick}
-                  />
-                )}
-              </div>
+              {t(props.title)}
               <Button
                 className="close-button"
                 dataElement={props.closeButtonDataElement}

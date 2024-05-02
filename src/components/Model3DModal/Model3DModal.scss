@@ -6,7 +6,6 @@
 
   .container {
     @extend %modal-shared-container-style;
-    @extend %modal-shared-container-style-mobile;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -19,10 +18,31 @@
     background: var(--component-background);
 
     @include mobile {
+      width: 100%;
+      position: fixed;
+      left: 0;
+      bottom: 0;
       padding-top: 24px;
       padding-bottom: 16px;
       padding-left: 24px;
       padding-right: 24px;
+
+      .swipe-indicator {
+        background: var(--divider);
+        border-radius: 2px;
+        height: 4px;
+        width: 38px;
+        position: absolute;
+        top: 12px;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+
+        @include tablet-and-desktop {
+          display: none;
+        }
+      }
     }
 
     .inputWrapper > label {
@@ -67,7 +87,7 @@
     input[type=number] {
       -moz-appearance: textfield;
     }
-
+   
     form {
       width: 100%;
     }
@@ -104,7 +124,7 @@
         cursor: not-allowed;
       }
     }
-
+    
   }
 }
 
@@ -137,7 +157,7 @@
   &.active {
     background: var(--tools-overlay-button-active);
   }
-
+  
   &.add-btn {
     @include mobile {
       width: auto;
@@ -146,5 +166,5 @@
       height: 30px;
     }
   }
-
+  
 }

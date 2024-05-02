@@ -111,6 +111,10 @@
           background: none;
           color: var(--primary-button-hover);
         }
+        
+        @include mobile {
+          color: var(--ribbon-active-color);
+        }
       }
 
       &:disabled {

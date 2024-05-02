@@ -127,16 +127,6 @@ const TextSignature = ({
 
   const forceUpdate = useForceUpdate();
 
-  // Create button is only enabled when there's a signature
-  // if initials are enabled, then those must also be filled in
-  useEffect(() => {
-    if (fullSignature && (!isInitialsModeEnabled || initials)) {
-      enableCreateButton();
-    } else {
-      disableCreateButton();
-    }
-  }, [initials, fullSignature, isInitialsModeEnabled]);
-
   useEffect(() => {
     // this can happen when an user added a new signature font, select it and then removed it
     // in this case we just assume there's at least one font and set the active index to 0
@@ -229,8 +219,10 @@ const TextSignature = ({
     if (signatureValue.trim()) {
       const base64 = cropImageFromCanvas(canvas);
       signatureToolArray.forEach((tool) => tool.setSignature(base64));
+      enableCreateButton();
     } else {
       signatureToolArray.forEach((tool) => tool.setSignature(null));
+      disableCreateButton();
     }
   };
 
@@ -242,8 +234,10 @@ const TextSignature = ({
     if (initialsValue.trim()) {
       const base64 = cropImageFromCanvas(canvas);
       signatureToolArray.forEach((tool) => tool.setInitials(base64));
+      enableCreateButton();
     } else {
       signatureToolArray.forEach((tool) => tool.setInitials(null));
+      disableCreateButton();
     }
   };
 
@@ -307,8 +301,7 @@ const TextSignature = ({
 
   // Renders the font options if initials and text signature are occupied
   const renderFontOptions = () => {
-    const isInitialsModeEnabledAndEmpty = isInitialsModeEnabled && initials === '';
-    if (fullSignature === '' && (isInitialsModeEnabledAndEmpty || !isInitialsModeEnabled)) {
+    if (fullSignature === '' && initials === '') {
       return (
         <Dropdown
           disabled={true}

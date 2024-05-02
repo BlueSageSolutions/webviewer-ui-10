@@ -66,6 +66,13 @@ export default (enable, store) => (features, priority = PRIORITY_TWO) => {
         'linkButton',
         'toolsHeader',
         'toolsOverlay',
+        'default-ribbon-group',
+        'tools-header',
+        'notesPanelToggle',
+        'rubberStampPanel',
+        'stylePanel',
+        'signatureListPanel',
+        'markReplaceTextToolButton',
       ],
       fn: () => {
         if (isOfficeEditorMode()) {
@@ -115,6 +122,7 @@ export default (enable, store) => (features, priority = PRIORITY_TWO) => {
         'notesPanelButton',
         'notesPanel',
         'toggleNotesButton',
+        'notesPanelToggle',
       ],
     },
     [Feature.InlineComment]: {
@@ -256,7 +264,10 @@ export default (enable, store) => (features, priority = PRIORITY_TWO) => {
       }
     },
     [Feature.Search]: {
-      dataElements: ['searchButton'],
+      dataElements: [
+        'searchButton',
+        'searchPanelToggle',
+      ],
       fn: () => {
         if (enable) {
           hotkeysManager.enableShortcut(Shortcuts.SEARCH);

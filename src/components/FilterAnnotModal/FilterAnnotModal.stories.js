@@ -1,146 +1,106 @@
 import React from 'react';
-import FilterAnnotModal from './FilterAnnotModal';
+import FilterAnnotModal from './FilterAnnotModal'
+import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
+import core from 'core';
 
 export default {
   title: 'Components/FilterAnnotModal',
   component: FilterAnnotModal
 };
 
-const initialState = {
-  viewer: {
-    openElements: { filterModal: true },
-    disabledElements: {},
-    colorMap: {
-      rectangle: {
-        currentStyleTab: 'StrokeColor',
-        iconColor: 'StrokeColor'
+const rectAnnot = new window.Annotations.RectangleAnnotation();
+rectAnnot.Author = 'Guest_1';
+rectAnnot.getStatus = () => null;
+rectAnnot.getCustomData = () => '';
+rectAnnot.StrokeColor = new window.Annotations.Color(255, 0, 0);
+
+const freeTextAnnot = new window.Annotations.FreeTextAnnotation();
+freeTextAnnot.Author = 'Guest_2';
+freeTextAnnot.getStatus = () => null;
+freeTextAnnot.TextColor = new window.Annotations.Color(0, 255, 0);
+
+core.getAnnotationsList = () => [
+  rectAnnot,
+  freeTextAnnot
+];
+
+const getStore = (num) => {
+  const initialState = {
+    viewer: {
+      openElements: { filterModal: true },
+      disabledElements: {},
+      colorMap: {
+        rectangle: {
+          currentPalette: 'StrokeColor',
+          iconColor: 'StrokeColor'
+        },
+        freeText: {
+          currentPalette: 'TextColor',
+          iconColor: 'TextColor'
+        }
       },
-      freeText: {
-        currentStyleTab: 'TextColor',
-        iconColor: 'TextColor'
-      }
-    },
-    customElementOverrides: {},
-    tab: {},
-    annotationFilters: {
-      isDocumentFilterActive: false,
-      includeReplies: true,
-      authorFilter: [],
-      colorFilter: [],
-      typeFilter: [],
-      statusFilter: []
-    },
+      customElementOverrides: {},
+      tab: {},
+      annotationFilters: {
+        includeReplies: true,
+        authorFilter: [],
+        colorFilter: [],
+        typeFilter: [],
+        statusFilter: []
+      },
+    }
+  };
+
+  if (num === 1) {
+    initialState.viewer.tab.filterAnnotModal = 'annotationUserFilterPanelButton';
+  } else if (num === 2) {
+    initialState.viewer.tab.filterAnnotModal = 'annotationColorFilterPanelButton';
+  } else if (num === 3) {
+    initialState.viewer.tab.filterAnnotModal = 'annotationTypeFilterPanelButton';
   }
+
+  function rootReducer(state = initialState, action) {
+    return state;
+  }
+
+  return createStore(rootReducer);
 };
 
+// State 1
 export function UserPanel() {
   const props = {
     isOpen: true
   };
 
-  const initialStateUserPanel = {
-    viewer: {
-      ...initialState.viewer,
-      tab: {
-        filterAnnotModal: 'annotationUserFilterPanelButton'
-      }
-    }
-  };
-
   return (
-    <Provider store={configureStore({ reducer: () => initialStateUserPanel })}>
+    <Provider store={getStore(1)}>
       <FilterAnnotModal {...props} />
     </Provider>
   );
 }
 
+// State 2
 export function ColorPanel() {
   const props = {
     isOpen: true
   };
 
-  const initialStateColorPanel = {
-    viewer: {
-      ...initialState.viewer,
-      tab: {
-        filterAnnotModal: 'annotationColorFilterPanelButton'
-      }
-    }
-  };
-
   return (
-    <Provider store={configureStore({ reducer: () => initialStateColorPanel })}>
+    <Provider store={getStore(2)}>
       <FilterAnnotModal {...props} />
     </Provider>
   );
 }
 
+// State 3
 export function TypePanel() {
   const props = {
     isOpen: true
   };
 
-  const initialStateTypePanel = {
-    viewer: {
-      ...initialState.viewer,
-      tab: {
-        filterAnnotModal: 'annotationTypeFilterPanelButton'
-      }
-    }
-  };
-
   return (
-    <Provider store={configureStore({ reducer: () => initialStateTypePanel })}>
-      <FilterAnnotModal {...props} />
-    </Provider>
-  );
-}
-
-export function MeasurementAnnotationsFilterEnabled() {
-  const props = {
-    isOpen: true
-  };
-
-  const initialStateMeasurementFilterEnabled = {
-    viewer: {
-      ...initialState.viewer,
-      tab: {
-        filterAnnotModal: 'annotationTypeFilterPanelButton'
-      },
-      isMeasurementAnnotationFilterEnabled: true,
-    }
-  };
-
-
-  return (
-    <Provider store={configureStore({ reducer: () => initialStateMeasurementFilterEnabled })}>
-      <FilterAnnotModal {...props} />
-    </Provider>
-  );
-}
-
-export function DocumentFilterActive() {
-  const props = {
-    isOpen: true
-  };
-
-  const initialStateDocumentFilterActive = {
-    viewer: {
-      ...initialState.viewer,
-      tab: {
-        filterAnnotModal: 'annotationUserFilterPanelButton'
-      },
-      annotationFilters: {
-        ...initialState.viewer.annotationFilters,
-        isDocumentFilterActive: true,
-      }
-    }
-  };
-
-  return (
-    <Provider store={configureStore({ reducer: () => initialStateDocumentFilterActive })}>
+    <Provider store={getStore(3)}>
       <FilterAnnotModal {...props} />
     </Provider>
   );

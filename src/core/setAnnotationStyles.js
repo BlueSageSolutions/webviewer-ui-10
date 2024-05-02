@@ -1,10 +1,8 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.AnnotationManager.html#setAnnotationStyles__anchor
+ * https://www.pdftron.com/api/web/Core.AnnotationManager.html#setAnnotationStyles__anchor
  * @fires annotationChanged on AnnotationManager
- * @see https://docs.apryse.com/api/web/Core.AnnotationManager.html#event:annotationChanged__anchor
+ * @see https://www.pdftron.com/api/web/Core.AnnotationManager.html#event:annotationChanged__anchor
  */
-export default (annotation, newStyles, documentViewerKey = 1) => {
-  core.getDocumentViewer(documentViewerKey).getAnnotationManager().setAnnotationStyles(annotation, newStyles);
+export default (annotation, callback) => {
+  window.documentViewer.getAnnotationManager().setAnnotationStyles(annotation, callback);
 };

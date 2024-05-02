@@ -3,7 +3,6 @@ import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import selectors from 'selectors';
-import DataElements from 'constants/dataElement';
 
 import {
   renderPermissionStatus,
@@ -22,9 +21,9 @@ const SignatureValidationModal = () => {
 
   const [isOpen, verificationResult] = useSelector(
     (state) => {
-      const { validationModalWidgetName } = state.digitalSignatureValidation;
+      const { validationModalWidgetName } = state.viewer;
       return [
-        selectors.isElementOpen(state, DataElements.SIGNATURE_VALIDATION_MODAL),
+        selectors.isElementOpen(state, 'signatureValidationModal'),
         selectors.getVerificationResult(state, validationModalWidgetName),
       ];
     },
@@ -34,7 +33,7 @@ const SignatureValidationModal = () => {
   const dispatch = useDispatch();
 
   const closeModal = () => {
-    dispatch(actions.closeElements([DataElements.SIGNATURE_VALIDATION_MODAL]));
+    dispatch(actions.closeElements(['signatureValidationModal']));
   };
 
   useOnClickOutside(containerRef, closeModal);
@@ -43,11 +42,11 @@ const SignatureValidationModal = () => {
     if (isOpen) {
       dispatch(
         actions.closeElements([
-          DataElements.SIGNATURE_MODAL,
-          DataElements.LOADING_MODAL,
-          DataElements.PRINT_MODAL,
-          DataElements.ERROR_MODAL,
-          DataElements.PASSWORD_MODAL,
+          'signatureModal',
+          'printModal',
+          'errorModal',
+          'loadingModal',
+          'passwordModal',
         ])
       );
     }
@@ -149,10 +148,7 @@ const SignatureValidationModal = () => {
               badgeIcon === 'digital_signature_valid'
                 ? translate(
                   'digitalSignatureModal.summaryBox.signedBy',
-                  {
-                    name: signerName || translate('digitalSignatureModal.unknown'),
-                    interpolation: { escapeValue: false }
-                  },
+                  { name: signerName || translate('digitalSignatureModal.unknown') },
                 ) : ''
             }
           </div>
@@ -488,7 +484,7 @@ const SignatureValidationModal = () => {
         open: isOpen,
         closed: !isOpen,
       })}
-      data-element={DataElements.SIGNATURE_VALIDATION_MODAL}
+      data-element="signatureValidationModal"
     >
       <div className="container" ref={containerRef}>
         {renderHeader()}

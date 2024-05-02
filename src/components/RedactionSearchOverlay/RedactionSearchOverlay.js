@@ -7,27 +7,23 @@ import './RedactionSearchOverlay.scss';
 const buildSearchOptions = (searchTerms) => {
   const options = {
     textSearch: [],
-    caseSensitive: true,
   };
 
   if (!searchTerms) {
     return options;
   }
 
-  searchTerms.forEach((searchTerm) => {
+  searchTerms.forEach(searchTerm => {
     const { type } = searchTerm;
     if (type === redactionTypeMap['TEXT']) {
       options.textSearch.push(searchTerm.label);
     } else {
       options[type] = true;
     }
-    if (searchTerm.regex) {
-      options.caseSensitive = options.caseSensitive && !searchTerm.regex.ignoreCase;
-    }
   });
 
   return options;
-};
+}
 
 const RedactionSearchOverlay = (props) => {
   const {
@@ -39,7 +35,9 @@ const RedactionSearchOverlay = (props) => {
     redactionSearchOptions,
   } = props;
 
-  const handleChange = (updatedSearchTerms) => {
+  const handleChange = (
+    updatedSearchTerms,
+  ) => {
     setSearchTerms(updatedSearchTerms);
     const options = buildSearchOptions(updatedSearchTerms);
     executeRedactionSearch(options);
@@ -50,20 +48,26 @@ const RedactionSearchOverlay = (props) => {
       label: newValue,
       value: newValue,
       type: redactionTypeMap['TEXT']
-    };
-    // Initially search terms are null so we safeguard against this
-    const nonNullSearchTerms = searchTerms || [];
+    }
+    //Initially search terms are null so we safeguard against this
+    const nonNullSearchTerms = searchTerms ? searchTerms : [];
     const updatedSearchTerms = [...nonNullSearchTerms, textTerm];
     setSearchTerms(updatedSearchTerms);
     const options = buildSearchOptions(updatedSearchTerms);
-    options.caseSensitive = false;
     executeRedactionSearch(options);
   };
 
+  const textInputOnKeyUp = (event) => {
+    if (event.key === 'Enter') {
+      const options = buildSearchOptions(searchTerms);
+      executeRedactionSearch(options);
+    }
+  }
   return (
     <DataElementWrapper
       className="RedactionSearchOverlay"
       dataElement="redactionSearchOverlay"
+      onKeyUp={textInputOnKeyUp}
     >
       <RedactionSearchMultiSelect
         onFocus={() => setIsRedactionSearchActive(true)}
@@ -76,7 +80,7 @@ const RedactionSearchOverlay = (props) => {
 
     </DataElementWrapper>
 
-  );
+  )
 };
 
 export default RedactionSearchOverlay;

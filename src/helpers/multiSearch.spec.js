@@ -35,6 +35,11 @@ jest.mock('core', () => ({
   })
 }));
 
+jest.mock('selectors', () => ({
+  getActiveDocumentViewerKey: () => '1',
+  getRedactionSearchPatterns: () => ([])
+}));
+
 describe('multiSearch', () => {
   it('does not throw any errors when initializing', () => {
     const multiSearch = multiSearchFactory(mockStore);

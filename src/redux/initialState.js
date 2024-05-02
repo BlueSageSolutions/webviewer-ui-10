@@ -2,6 +2,7 @@ import React from 'react';
 import actions from 'actions';
 import core from 'core';
 import ToggleZoomOverlay from 'components/ToggleZoomOverlay';
+import TrackChangeOverlay from 'components/TrackChangeOverlay';
 import ToolsOverlay from 'components/ToolsOverlay';
 import Ribbons from 'components/Ribbons';
 import ApplyFormFieldButton from 'components/ApplyFormFieldButton';
@@ -22,13 +23,15 @@ import defaultDateTimeFormats from 'constants/defaultDateTimeFormats';
 import { redactionTypeMap } from 'constants/redactionTypes';
 import { getMeasurementScalePreset, initialScale } from 'constants/measurementScale';
 import { availableFontFaces, cssFontValues } from 'constants/officeEditorFonts';
+import { OFFICE_EDITOR_EDIT_MODE } from 'constants/officeEditor';
 import SignatureModes from 'constants/signatureModes';
 import { ShortcutKeys } from 'helpers/hotkeysManager';
 import defaultToolsWithInlineComment from 'src/constants/defaultToolsWithInlineCommentOnAnnotationSelected';
 import { SYNC_MODES } from 'constants/multiViewerContants';
 import { getInstanceID } from 'helpers/getRootNode';
 import { initialColors, initialTextColors } from 'helpers/initialColorStates';
-import { defaultModularComponents, defaultModularHeaders } from './modularComponents';
+import { defaultModularComponents, defaultModularHeaders, defaultFlyoutMap } from './modularComponents';
+import { PANEL_SIZES } from 'constants/panel';
 
 const { ToolNames } = window.Core.Tools;
 const instanceId = getInstanceID();
@@ -106,6 +109,7 @@ export default {
       rubberStampPanel: 330,
       customLeftPanel: 330
     },
+    mobilePanelSize: PANEL_SIZES.SMALL_SIZE,
     documentContainerWidth: null,
     documentContainerHeight: null,
     lastPickedToolForGroup: {},
@@ -175,6 +179,17 @@ export default {
           type: 'customElement',
           render: () => <Ribbons />,
           className: 'custom-ribbons-container',
+        },
+        {
+          type: 'customElement',
+          render: () => <TrackChangeOverlay />,
+          dataElement: DataElements.TRACK_CHANGE_OVERLAY_BUTTON,
+          isOfficeEditorOnly: true,
+        },
+        {
+          type: 'divider',
+          hidden: ['small-mobile'],
+          isOfficeEditorOnly: true,
         },
         {
           type: 'toggleElementButton',
@@ -1729,7 +1744,7 @@ export default {
         showColor: 'never',
       },
       TextSelect: { dataElement: 'textSelectButton', img: 'icon-header-select-line', showColor: 'never' },
-      OfficeEditorTextSelect: { dataElement: 'textSelectButton', img: 'icon-header-select-line', showColor: 'never' },
+      OfficeEditorContentSelect: { dataElement: 'textSelectButton', img: 'icon-header-select-line', showColor: 'never' },
       MarqueeZoomTool: { dataElement: 'marqueeToolButton', showColor: 'never' },
       AnnotationEraserTool: {
         dataElement: 'eraserToolButton',
@@ -1977,6 +1992,7 @@ export default {
     standardStamps: [],
     customStamps: [],
     selectedStampIndex: 0,
+    lastSelectedStampIndex: 0,
     signatureMode: SignatureModes.FULL_SIGNATURE,
     savedSignatures: [],
     savedInitials: [],
@@ -2068,7 +2084,7 @@ export default {
     toolDefaultStyleUpdateFromAnnotationPopupEnabled: true,
     annotationToolStyleSyncingEnabled: false,
     shortcutKeyMap: { ...ShortcutKeys },
-    flyoutMap: {},
+    flyoutMap: defaultFlyoutMap,
     flyoutPosition: { x: 0, y: 0 },
     activeFlyout: null,
     flyoutToggleElement: null,
@@ -2173,6 +2189,7 @@ export default {
     },
     availableFontFaces,
     cssFontValues,
+    editMode: OFFICE_EDITOR_EDIT_MODE.EDITING
   },
   digitalSignatureValidation: {
     validationModalWidgetName: '',

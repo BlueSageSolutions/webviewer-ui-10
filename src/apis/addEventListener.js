@@ -12,8 +12,12 @@ WebViewer(...)
     });
   });
  */
-import { getInstanceNode } from 'helpers/getRootNode';
+
+import Events from 'constants/events';
 
 export default (eventName, listener) => {
-  getInstanceNode().addEventListener(eventName, listener);
+  if (eventName === Events.FINISHED_SAVING_PDF) {
+    console.warn('FINISHED_SAVING_PDF is deprecated since version 8.3. Please use FILE_DOWNLOADED instead.');
+  }
+  window.addEventListener(eventName, listener);
 };

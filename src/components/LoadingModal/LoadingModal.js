@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import getClassName from 'helpers/getClassName';
 import actions from 'actions';
 import selectors from 'selectors';
-import DataElements from 'constants/dataElement';
 
 import './LoadingModal.scss';
 
@@ -18,11 +17,7 @@ class LoadingModal extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     if (!prevProps.isOpen && this.props.isOpen) {
-      this.props.closeElements([
-        DataElements.SIGNATURE_MODAL,
-        DataElements.PRINT_MODAL,
-        DataElements.ERROR_MODAL,
-      ]);
+      this.props.closeElements(['signatureModal', 'printModal', 'errorModal']);
     }
   }
 
@@ -34,7 +29,7 @@ class LoadingModal extends React.PureComponent {
     const className = getClassName('Modal LoadingModal', this.props);
 
     return (
-      <div className={className} data-element={DataElements.LOADING_MODAL}>
+      <div className={className} data-element="loadingModal">
         <div className="container">
           <div className="inner-wrapper"></div>
         </div>
@@ -43,9 +38,10 @@ class LoadingModal extends React.PureComponent {
   }
 }
 
-const mapStateToProps = (state) => ({
-  isDisabled: selectors.isElementDisabled(state, DataElements.LOADING_MODAL),
-  isOpen: selectors.isElementOpen(state, DataElements.LOADING_MODAL),
+const mapStateToProps = state => ({
+  isDisabled: selectors.isElementDisabled(state, 'loadingModal'),
+  isOpen: selectors.isElementOpen(state, 'loadingModal'),
+  loadingProgress: selectors.getLoadingProgress(state),
 });
 
 const mapDispatchToProps = {

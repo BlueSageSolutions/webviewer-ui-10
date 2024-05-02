@@ -1,8 +1,6 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.DocumentViewer.html#closeDocument__anchor
+ * https://www.pdftron.com/api/web/Core.DocumentViewer.html#closeDocument__anchor
  * @fires documentUnloaded on DocumentViewer
- * @see https://docs.apryse.com/api/web/Core.DocumentViewer.html#event:documentUnloaded__anchor
+ * @see onDocumentUnloaded.js (No documentation yet)
  */
-export default (documentViewerKey = 1) => core.getDocumentViewer(documentViewerKey).closeDocument();
+export default () => window.documentViewer.closeDocument();

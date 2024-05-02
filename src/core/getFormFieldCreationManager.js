@@ -1,6 +1,6 @@
 import getAnnotationManager from './getAnnotationManager';
 
-export default (documentViewerKey = 1) => {
-  const annotManager = getAnnotationManager(documentViewerKey);
+export default () => {
+  const annotManager = getAnnotationManager();
   return annotManager.getFormFieldCreationManager();
 };

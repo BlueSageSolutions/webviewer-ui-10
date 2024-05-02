@@ -1,13 +1,14 @@
-import React from 'react';
+import React from "react";
 import Icon from 'components/Icon';
 import ToolButton from 'components/ToolButton';
-import classNames from 'classnames';
-import { useDispatch, useSelector } from 'react-redux';
+import PropTypes from "prop-types";
+import classNames from "classnames";
+import { useDispatch, useSelector } from "react-redux";
 
-import actions from 'actions';
-import selectors from 'selectors';
+import actions from "actions";
+import selectors from "selectors";
 
-import './ToolButton.scss';
+import "./ToolButton.scss";
 
 const PresetButton = ({
   toolName,
@@ -16,13 +17,14 @@ const PresetButton = ({
   const [
     isActive,
   ] = useSelector(
-    (state) => [
+    state => [
       selectors.getActiveToolName(state) === toolName,
     ],
   );
 
   const dispatch = useDispatch();
   const getStylingDropdownButton = () => {
+
     return (
       <div
         className="tool-button-arrow-container"
@@ -43,7 +45,7 @@ const PresetButton = ({
   return (
     <div
       className={classNames({
-        'tool-button-container': true,
+        "tool-button-container": true,
       })}
     >
       <ToolButton

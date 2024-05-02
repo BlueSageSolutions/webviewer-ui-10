@@ -3,16 +3,16 @@ import PropTypes from 'prop-types';
 
 import './ListSeparator.scss';
 
-const propTypes = {
-  renderContent: PropTypes.func,
-  children: PropTypes.node,
-};
+class ListSeparator extends React.PureComponent {
+  static propTypes = {
+    renderContent: PropTypes.func,
+    children: PropTypes.node,
+  }
 
-const ListSeparator = (function(props) {
-  const content = props.renderContent ? props.renderContent() : props.children;
-  return <div className="ListSeparator">{content}</div>;
-});
+  render() {
+    const content = this.props.renderContent ? this.props.renderContent() : this.props.children;
+    return <div className="ListSeparator">{content}</div>;
+  }
+}
 
-ListSeparator.propTypes = propTypes;
-
-export default React.memo(ListSeparator);
+export default ListSeparator;

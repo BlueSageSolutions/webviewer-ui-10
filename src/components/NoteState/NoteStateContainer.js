@@ -4,8 +4,6 @@ import core from 'core';
 
 import NoteState from './NoteState';
 import { createStateAnnotation } from 'helpers/NoteStateUtils';
-import { useSelector } from 'react-redux';
-import selectors from 'selectors';
 
 
 const propTypes = {
@@ -13,20 +11,15 @@ const propTypes = {
 };
 
 function NoteStateContainer(props) {
-  const [
-    activeDocumentViewerKey,
-  ] = useSelector((state) => [
-    selectors.getActiveDocumentViewerKey(state),
-  ]);
   const { annotation } = props;
 
   const handleStateChange = React.useCallback(function handleStateChangeCallback(newValue) {
-    const stateAnnotation = createStateAnnotation(annotation, newValue, activeDocumentViewerKey);
+    const stateAnnotation = createStateAnnotation(annotation, newValue);
     annotation.addReply(stateAnnotation);
-    const annotationManager = core.getAnnotationManager(activeDocumentViewerKey);
+    const annotationManager = core.getAnnotationManager();
     annotationManager.addAnnotation(stateAnnotation);
     annotationManager.trigger('addReply', [stateAnnotation, annotation, annotationManager.getRootAnnotation(annotation)]);
-  }, [annotation, activeDocumentViewerKey]);
+  }, [annotation]);
 
   return (
     <div>

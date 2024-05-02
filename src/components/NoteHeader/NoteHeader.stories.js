@@ -1,15 +1,13 @@
 import React from 'react';
 import NoteHeader from './NoteHeader';
 import NoteContext from '../Note/Context';
-
 import { createStore } from 'redux';
-
 import { Provider } from 'react-redux';
 
 export default {
   title: 'Components/Note/NoteHeader',
   component: NoteHeader,
-  includeStories: ['Basic', 'BasicWithAnnotationNumbering'],
+  includeStories: ['Basic', 'BasicWithAnnotationNumbering', 'BasicWithTrackedChange'],
   excludeStories: ['testProps'],
 };
 
@@ -88,6 +86,22 @@ export function BasicWithAnnotationNumbering() {
     <Provider store={store}>
       <NoteContext.Provider value={context}>
         <NoteHeader {...testPropsWithAnnotationNumbering} />
+      </NoteContext.Provider>
+    </Provider>
+  );
+}
+
+export const testPropsWithTrackedChange = {
+  ...testProps,
+  isTrackedChange: true,
+  isSelected: true
+};
+
+export function BasicWithTrackedChange() {
+  return (
+    <Provider store={store}>
+      <NoteContext.Provider value={context}>
+        <NoteHeader {...testPropsWithTrackedChange} />
       </NoteContext.Provider>
     </Provider>
   );

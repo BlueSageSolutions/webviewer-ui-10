@@ -272,6 +272,11 @@ export default (initialState) => (state = initialState, action) => {
         ...state,
         selectedStampIndex: payload.index,
       };
+    case 'SET_LAST_SELECTED_STAMP_INDEX':
+      return {
+        ...state,
+        lastSelectedStampIndex: payload.index,
+      };
     case 'SET_SELECTED_DISPLAYED_SIGNATURE_INDEX':
       return {
         ...state,
@@ -613,6 +618,11 @@ export default (initialState) => (state = initialState, action) => {
         ...state,
         genericPanels: [...payload.genericPanels],
       };
+    case 'SET_MOBILE_PANEL_SIZE':
+      return {
+        ...state,
+        mobilePanelSize: payload.panelSize,
+      };
     case 'USE_EMBEDDED_PRINT':
       return { ...state, useEmbeddedPrint: payload.useEmbeddedPrint };
     case 'SET_PAGE_LABELS':
@@ -792,6 +802,13 @@ export default (initialState) => (state = initialState, action) => {
       // This is to prevent the case where the header is not yet initialized
       if (!existingModularHeader) {
         return state;
+      }
+
+      // Remove existing items and replace with new one
+      if (itemsDataElements) {
+        itemsDataElements.forEach((key) => {
+          delete state.modularComponents[key];
+        });
       }
 
       const updatedModularHeader = {

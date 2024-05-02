@@ -1,41 +1,39 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useSelector, shallowEqual } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import PropTypes from 'prop-types';
+
 import core from 'core';
+import { isMobileDevice } from 'helpers/device';
 import selectors from 'selectors';
 
-import { isMobileDevice } from 'helpers/device';
-import DataElements from 'constants/dataElement';
+import './AnnotationContentOverlay.scss';
+import actions from 'actions';
+
 import CustomElement from '../CustomElement';
 import FormFieldPlaceHolderOverlay from './FormFieldPlaceHolderOverlay';
-import './AnnotationContentOverlay.scss';
 
 const MAX_CHARACTERS = 100;
 
-const propTypes = {
-  annotation: PropTypes.object,
-  clientXY: PropTypes.object,
-};
+const AnnotationContentOverlay = () => {
+  const [isDisabled, isOverlayOpen] = useSelector((state) => [
+    selectors.isElementDisabled(state, 'annotationContentOverlay'),
+    selectors.isElementOpen(state, 'annotationContentOverlay'),
+  ]
 
-const AnnotationContentOverlay = ({ annotation, clientXY }) => {
-  const [
-    isDisabled,
-    isOverlayOpen,
-    // Clients have the option to customize how the tooltip is rendered by passing a handler
-    customHandler,
-  ] = useSelector((state) => [
-    selectors.isElementDisabled(state, DataElements.ANNOTATION_CONTENT_OVERLAY),
-    selectors.isElementOpen(state, DataElements.ANNOTATION_CONTENT_OVERLAY),
-    selectors.getAnnotationContentOverlayHandler(state),
-  ], shallowEqual);
-
+  );
   const [t] = useTranslation();
+  const [annotation, setAnnotation] = useState();
   const [overlayPosition, setOverlayPosition] = useState({
     left: 0,
     top: 0,
   });
+  const dispatch = useDispatch();
 
+  // Clients have the option to customize how the tooltip is rendered
+  // by passing a handler
+  const customHandler = useSelector((state) => selectors.getAnnotationContentOverlayHandler(state),
+  );
   const isUsingCustomHandler = customHandler !== null;
   const overlayRef = useRef(null);
   const contents = annotation?.getContents();
@@ -44,15 +42,15 @@ const AnnotationContentOverlay = ({ annotation, clientXY }) => {
   const gap = 20;
 
   useEffect(() => {
-    const fitWindowSize = (clientX, clientY, left, top) => {
+    const fitWindowSize = (e, left, top) => {
       const overlayRect = overlayRef.current.getBoundingClientRect();
 
       if (left + overlayRect.width > window.innerWidth) {
-        left = clientX - overlayRect.width - gap;
+        left = e.clientX - overlayRect.width - gap;
       }
 
       if (top + overlayRect.height > window.innerHeight) {
-        top = clientY - overlayRect.height - gap;
+        top = e.clientY - overlayRect.height - gap;
       }
 
       if (top <= 0) {
@@ -62,12 +60,40 @@ const AnnotationContentOverlay = ({ annotation, clientXY }) => {
       return { left, top };
     };
 
-    if (overlayRef.current && annotation) {
-      const { clientX, clientY } = clientXY;
-      const { left, top } = fitWindowSize(clientX, clientY, clientX + gap, clientY + gap);
-      setOverlayPosition({ left, top });
-    }
-  }, [annotation, clientXY]);
+    const onMouseHover = (e) => {
+      if (e.buttons !== 0) {
+        return;
+      }
+      const viewElement = core.getViewerElement();
+      let annotation = core
+        .getAnnotationManager()
+        .getAnnotationByMouseEvent(e);
+
+      if (annotation && viewElement.contains(e.target)) {
+        // if hovered annot is grouped, pick the "primary" annot to match Adobe's behavior
+        const groupedAnnots = core.getAnnotationManager().getGroupAnnotations(annotation);
+        const ungroupedAnnots = groupedAnnots.filter((annot) => !annot.isGrouped());
+        annotation = ungroupedAnnots.length > 0 ? ungroupedAnnots[0] : annotation;
+
+        if (isUsingCustomHandler || !(annotation instanceof Annotations.FreeTextAnnotation)) {
+          setAnnotation(annotation);
+          if (overlayRef.current) {
+            const { left, top } = fitWindowSize(e, e.clientX + gap, e.clientY + gap);
+            setOverlayPosition({ left, top });
+          }
+        }
+        dispatch(actions.openElement('annotationContentOverlay'));
+      } else {
+        setAnnotation(null);
+        dispatch(actions.closeElement('annotationContentOverlay'));
+      }
+    };
+
+    core.addEventListener('mouseMove', onMouseHover);
+    return () => {
+      core.removeEventListener('mouseMove', onMouseHover);
+    };
+  }, [annotation, dispatch, isUsingCustomHandler]);
 
   const numberOfReplies = annotation?.getReplies().length;
 
@@ -78,7 +104,7 @@ const AnnotationContentOverlay = ({ annotation, clientXY }) => {
   const renderContents = () => (
     <div
       className="Overlay AnnotationContentOverlay"
-      data-element={DataElements.ANNOTATION_CONTENT_OVERLAY}
+      data-element="annotationContentOverlay"
       style={{ ...overlayPosition }}
       ref={overlayRef}
     >
@@ -105,7 +131,7 @@ const AnnotationContentOverlay = ({ annotation, clientXY }) => {
       return (
         <div
           className="Overlay AnnotationContentOverlay"
-          data-element={DataElements.ANNOTATION_CONTENT_OVERLAY}
+          data-element="annotationContentOverlay"
           style={{ ...overlayPosition }}
           ref={overlayRef}
         >
@@ -132,7 +158,5 @@ const AnnotationContentOverlay = ({ annotation, clientXY }) => {
 
   return null;
 };
-
-AnnotationContentOverlay.propTypes = propTypes;
 
 export default AnnotationContentOverlay;

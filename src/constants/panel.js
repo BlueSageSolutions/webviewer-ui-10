@@ -17,6 +17,7 @@ export const panelNames = {
   TABS: 'tabPanel',
   SIGNATURE_LIST: 'signatureListPanel',
   RUBBER_STAMP: 'rubberStampPanel',
+  PORTFOLIO: 'portfolioPanel',
 };
 
 export const panelData = {
@@ -68,6 +69,10 @@ export const panelData = {
     icon: 'icon-header-chat-line',
     title: 'component.notesPanel',
   },
+  [panelNames.PORTFOLIO]: {
+    icon: 'icon-pdf-portfolio',
+    title: 'portfolio.portfolioPanelTitle',
+  },
   [panelNames.SIGNATURE_LIST]: {
     icon: 'icon-tool-signature',
     title: 'signatureListPanel.header',
@@ -76,4 +81,10 @@ export const panelData = {
     icon: 'icon-tool-stamp-line',
     title: 'annotation.rubberStamp',
   },
+};
+
+export const PANEL_SIZES = {
+  FULL_SIZE: 'full-size',
+  HALF_SIZE: 'half-size',
+  SMALL_SIZE: 'small-size',
 };

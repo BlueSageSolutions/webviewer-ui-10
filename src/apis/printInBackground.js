@@ -6,7 +6,6 @@
  * @param {boolean} [options.includeAnnotations=false] If true, will print the documents with the annotations
  * @param {boolean} [options.includeComments=false] If true, will append comments to the document printed
  * @param {boolean} [options.isPrintCurrentView] If true, will print the current viewport view of the current page
- * @param {boolean} [options.maintainPageOrientation] If true, will maintain the pages orientation as set in the webviewer during printing
  * @param {function} [options.onProgress] A callback function that is executed on each page processed
  * @example
 WebViewer(...)
@@ -18,7 +17,6 @@ WebViewer(...)
       instance.UI.printInBackground({
         includeComments:true,
         includeAnnotations: true,
-        maintainPageOrientation: true,
         onProgress: function(pageNumber, htmlElement) {},
       });
     });
@@ -28,11 +26,10 @@ WebViewer(...)
 import { print } from 'helpers/print';
 import selectors from 'selectors';
 
-export default (store) => (options) => {
+export default store => options => {
   const defaultOptions = {
     includeAnnotations: false,
     includeComments: false,
-    maintainPageOrientation: false,
   };
 
   const printOptions = {

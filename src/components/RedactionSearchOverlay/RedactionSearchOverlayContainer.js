@@ -13,11 +13,12 @@ function executeRedactionSearch(options, store) {
 }
 
 const RedactionSearchOverlayContainer = (props) => {
+
   const { setIsRedactionSearchActive } = useContext(RedactionPanelContext);
   const store = useStore();
-  const activeTheme = useSelector((state) => selectors.getActiveTheme(state));
-  const redactionSearchPatterns = useSelector((state) => selectors.getRedactionSearchPatterns(state), shallowEqual);
-  const redactionSearchOptions = Object.values(redactionSearchPatterns).map((pattern) => ({
+  const activeTheme = useSelector(state => selectors.getActiveTheme(state));
+  const redactionSearchPatterns = useSelector(state => selectors.getRedactionSearchPatterns(state), shallowEqual);
+  const redactionSearchOptions = Object.values(redactionSearchPatterns).map(pattern => ({
     ...pattern,
     value: pattern.type,
   }));

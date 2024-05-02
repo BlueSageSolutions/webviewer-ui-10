@@ -1,8 +1,6 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.Document.html#rotatePages__anchor
+ * https://www.pdftron.com/api/web/Core.Document.html#rotatePages__anchor
  * @fires pagesUpdated on DocumentViewer
- * @see https://docs.apryse.com/api/web/Core.html#event:pagesUpdated__anchor
+ * @see https://www.pdftron.com/api/web/namespaces.list.html#event:pagesUpdated__anchor
  */
-export default (arr, rotation, documentViewerKey = 1) => core.getDocumentViewer(documentViewerKey).getDocument().rotatePages(arr, rotation);
+export default (arr, rotation) => window.documentViewer.getDocument().rotatePages(arr, rotation);

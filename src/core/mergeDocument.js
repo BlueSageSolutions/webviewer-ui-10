@@ -1,11 +1,9 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.Document.html#mergeDocument__anchor
+ * https://www.pdftron.com/api/web/Core.Document.html#mergeDocument__anchor
  */
 
-export default async (documentToMerge, position, documentViewerKey = 1) => {
-  const documentViewer = core.getDocumentViewer(documentViewerKey);
+export default async (documentToMerge, position) => {
+  const { documentViewer } = window;
   if (documentViewer.getDocument()) {
     return documentViewer.getDocument().mergeDocument(documentToMerge, position);
   }

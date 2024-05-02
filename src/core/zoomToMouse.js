@@ -1,13 +1,11 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.DocumentViewer.html#zoomToMouse__anchor
+ * https://www.pdftron.com/api/web/Core.DocumentViewer.html#zoomToMouse__anchor
  * @fires fitModeUpdated on DocumentViewer
- * @see https://docs.apryse.com/api/web/Core.DocumentViewer.html#event:fitModeUpdated__anchor
+ * @see https://www.pdftron.com/api/web/Core.DocumentViewer.html#event:fitModeUpdated__anchor
  * @fires zoomUpdated on DocumentViewer
- * @see https://docs.apryse.com/api/web/Core.DocumentViewer.html#event:zoomUpdated__anchor
+ * @see https://www.pdftron.com/api/web/Core.DocumentViewer.html#event:zoomUpdated__anchor
  */
-export default (zoomFactor, documentViewerKey = 1, mouseEvent) => {
+export default zoomFactor => {
   // left panel width when it's not closed
   // it still maintains its width when closed
   const xOffset = document.querySelector('[data-element=leftPanel]:not(.closed)')?.offsetWidth || 0;
@@ -17,5 +15,5 @@ export default (zoomFactor, documentViewerKey = 1, mouseEvent) => {
   const headerToolsHeight = document.querySelector('[data-element=toolsHeader]')?.offsetHeight || 0;
   const yOffset = headerHeight + headerToolsHeight;
 
-  core.getDocumentViewer(documentViewerKey).zoomToMouse(zoomFactor, xOffset, yOffset, mouseEvent);
+  window.documentViewer.zoomToMouse(zoomFactor, xOffset, yOffset);
 };

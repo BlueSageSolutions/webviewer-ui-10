@@ -56,6 +56,10 @@ const DataElements = {
   COMPARE_PANEL: 'comparePanel',
   PORTFOLIO_PANEL: 'portfolioPanel',
   PORTFOLIO_PANEL_BUTTON: 'portfolioPanelButton',
+  LAYERS_PANEL: 'layersPanel',
+  SIGNATURE_PANEL: 'signaturePanel',
+  ATTACHMENT_PANEL: 'attachmentPanel',
+  MOBILE_PANEL_WRAPPER: 'MobilePanelWrapper',
   PORTFOLIO_ADD_FILE: 'portfolioAddFile',
   PORTFOLIO_ADD_FOLDER: 'portfolioAddFolder',
   PORTFOLIO_ADD_NEW_BUTTON: 'portfolioAddNewButton',
@@ -83,6 +87,7 @@ const DataElements = {
   MENU_OVERLAY_BUTTON: 'menuButton',
   ZOOM_OVERLAY: 'zoomOverlay',
   ZOOM_OVERLAY_BUTTON: 'zoomOverlayButton',
+  TRACK_CHANGE_OVERLAY_BUTTON: 'trackChangeOverlayButton',
   PAGE_MANIPULATION_OVERLAY: 'pageManipulationOverlay',
   PAGE_MANIPULATION_OVERLAY_BUTTON: 'pageManipulationOverlayButton',
   TOOLS_OVERLAY: 'toolsOverlay',
@@ -122,6 +127,7 @@ const DataElements = {
   LINK_ANNOTATION_UNLINK_BUTTON: 'linkAnnotationUnlinkButton',
   LINK_URI: 'linkUri',
   EMBEDDED_JS_POPUP: 'embeddedJsPopup',
+  MAIN_MENU: 'MainMenuFlyout',
 
   // Modals
   PAGE_REDACT_MODAL: 'pageRedactionModal',

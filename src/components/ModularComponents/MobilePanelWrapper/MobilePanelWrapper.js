@@ -3,63 +3,118 @@ import './MobilePanelWrapper.scss';
 import { Swipeable } from 'react-swipeable';
 import { isMobileSize } from 'helpers/getDeviceSize';
 import { useSelector, useDispatch } from 'react-redux';
+import PropTypes from 'prop-types';
 import selectors from 'selectors';
 import actions from 'actions';
 import classNames from 'classnames';
+import { PANEL_SIZES, panelNames } from 'constants/panel';
+import useResizeObserver from 'hooks/useResizeObserver';
 
-const propTypes = {};
-
-const PANEL_SIZES = {
-  FULL_SIZE: 'full-size',
-  HALF_SIZE: 'half-size',
-  SMALL_SIZE: 'small-size',
+const propTypes = {
+  children: PropTypes.node,
 };
 
-const MobilePanelWrapper = () => {
+const MOBILE_PANEL_WRAPPER = 'MobilePanelWrapper';
+
+const MobilePanelWrapper = ({ children }) => {
   const isMobile = isMobileSize();
   const dispatch = useDispatch();
-  const [panelSize, setPanelSize] = useState(PANEL_SIZES.SMALL_SIZE);
-  const [isOpen] = useSelector((state) => [
-    selectors.isElementOpen(state, 'MobilePanelWrapper')
+  const contentElement = children?.props?.dataElement;
+
+  const [
+    isOpen,
+    isContentOpen,
+    documentContainerWidthStyle,
+    mobilePanelSize,
+  ] = useSelector((state) => [
+    selectors.isElementOpen(state, MOBILE_PANEL_WRAPPER),
+    selectors.isElementOpen(state, contentElement),
+    selectors.getDocumentContentContainerWidthStyle(state),
+    selectors.getMobilePanelSize(state),
   ]);
 
+  const [style, setStyle] = useState({});
+  const [wrapperBodyStyle, setWrapperBodyStyle] = useState({});
+
+  const setMobilePanelSize = (size) => {
+    dispatch(actions.setMobilePanelSize(size));
+  };
+
+  const [wrapperRef, dimensions] = useResizeObserver();
+
   useEffect(() => {
+    const panelsStartingAtHalfSize = [panelNames.RUBBER_STAMP, panelNames.STYLE];
     if (isOpen) {
-      setPanelSize(PANEL_SIZES.SMALL_SIZE);
+      if (panelsStartingAtHalfSize.includes(contentElement)) {
+        setMobilePanelSize(PANEL_SIZES.HALF_SIZE);
+      } else {
+        setMobilePanelSize(PANEL_SIZES.SMALL_SIZE);
+      }
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isContentOpen) {
+      dispatch(actions.closeElement(MOBILE_PANEL_WRAPPER));
+    }
+  }, [isContentOpen]);
+
+  useEffect(() => {
+    setStyle({ width: documentContainerWidthStyle });
+  }, [documentContainerWidthStyle]);
+
+  useEffect(() => {
+    if (dimensions.height !== null) {
+      // 16px is the padding of the mobile panel body
+      setWrapperBodyStyle({ height: dimensions.height - 16 });
+    }
+  }, [dimensions]);
+
   const closePanel = () => {
-    setPanelSize(PANEL_SIZES.SMALL_SIZE);
-    dispatch(actions.closeElement('MobilePanelWrapper'));
+    dispatch(actions.closeElement(MOBILE_PANEL_WRAPPER));
+    dispatch(actions.closeElement(contentElement));
   };
 
   if (!isMobile || !isOpen) {
     return null;
   }
 
-  const onSwipedUp = () => {
-    switch (panelSize) {
-      case PANEL_SIZES.SMALL_SIZE:
-        setPanelSize(PANEL_SIZES.HALF_SIZE);
-        break;
-      case PANEL_SIZES.HALF_SIZE:
-        setPanelSize(PANEL_SIZES.FULL_SIZE);
-        break;
+  const isAreaScrollable = (e) => {
+    const targetElement = e.event.target;
+    const className = targetElement.className;
+    return className.includes('swipe-indicator-wrapper');
+  };
+
+  const onSwipedUp = (e) => {
+    if (isAreaScrollable(e)) {
+      switch (mobilePanelSize) {
+        case PANEL_SIZES.SMALL_SIZE:
+          setMobilePanelSize(PANEL_SIZES.HALF_SIZE);
+          break;
+        case PANEL_SIZES.HALF_SIZE:
+          setMobilePanelSize(PANEL_SIZES.FULL_SIZE);
+          break;
+      }
     }
   };
 
-  const onSwipedDown = () => {
-    switch (panelSize) {
-      case PANEL_SIZES.FULL_SIZE:
-        setPanelSize(PANEL_SIZES.HALF_SIZE);
-        break;
-      case PANEL_SIZES.HALF_SIZE:
-        setPanelSize(PANEL_SIZES.SMALL_SIZE);
-        break;
-      case PANEL_SIZES.SMALL_SIZE:
-        closePanel();
-        break;
+  const onSwipedDown = (e) => {
+    if (isAreaScrollable(e)) {
+      switch (mobilePanelSize) {
+        case PANEL_SIZES.FULL_SIZE:
+          setMobilePanelSize(PANEL_SIZES.HALF_SIZE);
+          break;
+        case PANEL_SIZES.HALF_SIZE:
+          if (contentElement === panelNames.STYLE) {
+            closePanel();
+          } else {
+            setMobilePanelSize(PANEL_SIZES.SMALL_SIZE);
+          }
+          break;
+        case PANEL_SIZES.SMALL_SIZE:
+          closePanel();
+          break;
+      }
     }
   };
 
@@ -72,13 +127,21 @@ const MobilePanelWrapper = () => {
       onSwipedUp={onSwipedUp}
       onSwipedDown={onSwipedDown}
       trackMouse
-      preventDefaultTouchmoveEvent
     >
-      <div data-element="MobilePanelWrapper" className={classNames('MobilePanelWrapper', {
-        [panelSize]: true,
-      })} onClick={onContainerClick}
-      >
-        <div className="swipe-indicator"/>
+      <div data-element={MOBILE_PANEL_WRAPPER} className={classNames(MOBILE_PANEL_WRAPPER, {
+        [mobilePanelSize]: true,
+      })}
+      ref={wrapperRef}
+      style={style}
+      role='none'
+      onClick={onContainerClick}
+      onKeyDown={onContainerClick}>
+        <div className="swipe-indicator-wrapper">
+          <div className="swipe-indicator" />
+        </div>
+        <div className="mobile-panel-body" style={wrapperBodyStyle}>
+          {React.Children.map(children, (child) => React.cloneElement(child, { panelSize: mobilePanelSize }))}
+        </div>
       </div>
     </Swipeable>
   );

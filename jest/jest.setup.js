@@ -14,7 +14,3 @@ global.withProviders = function withProviders(component) {
   const wrappedMockRedux = withMockRedux(wrappedI18n);
   return wrappedMockRedux;
 };
-
-const portalElement = document.createElement('div')
-portalElement.setAttribute('id', 'app')
-document.body.appendChild(portalElement)

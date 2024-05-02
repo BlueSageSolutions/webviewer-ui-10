@@ -12,7 +12,7 @@ import getColor from 'helpers/getColor';
 import { mapToolNameToKey } from 'constants/map';
 import actions from 'actions';
 import selectors from 'selectors';
-import { isTabletAndMobileSize } from 'helpers/getDeviceSize';
+import useMedia from 'hooks/useMedia';
 import DataElementWrapper from 'components/DataElementWrapper';
 
 import './ToolGroupButton.scss';
@@ -150,12 +150,16 @@ const mapDispatchToProps = {
 
 const ConnectedToolGroupButton = connect(mapStateToProps, mapDispatchToProps)(ToolGroupButton);
 
-const connectedComponent = (props) => {
-  const isTabletAndMobile = isTabletAndMobileSize();
+export default props => {
+  const isTabletAndMobile = useMedia(
+    // Media queries
+    ['(max-width: 900px)'],
+    [true],
+    // Default value
+    false,
+  );
 
   return (
     <ConnectedToolGroupButton {...props} isTabletAndMobile={isTabletAndMobile} />
   );
 };
-
-export default connectedComponent;

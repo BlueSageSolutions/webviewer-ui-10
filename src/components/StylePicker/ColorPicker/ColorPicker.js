@@ -1,14 +1,14 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
 import './ColorPicker.scss';
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
+import Icon from 'components/Icon';
 import actions from 'actions';
 import { useDispatch, useStore, useSelector } from 'react-redux';
 import Events from 'constants/events';
 import { getInstanceNode } from 'helpers/getRootNode';
 import selectors from 'selectors';
-import Button from 'components/Button';
 
 const parseColor = (color) => {
   if (!color) {
@@ -45,24 +45,16 @@ const propTypes = {
 const ColorPicker = ({
   onColorChange,
   hasTransparentColor = false,
-  color,
-  activeTool,
-  type,
+  color
 }) => {
-  const activeToolName = Object.values(window.Core.Tools.ToolNames).includes(activeTool) ? activeTool : window.Core.Tools.ToolNames.EDIT;
   const store = useStore();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [colors] = useSelector((state) => [
-    selectors.getColors(state, activeToolName, type),
+    selectors.getColors(state),
   ]);
   const [selectedColor, setSelectedColor] = useState();
   const [isExpanded, setIsExpanded] = useState(false);
-  const forceExpandRef = useRef(true);
-
-  useEffect(() => {
-    forceExpandRef.current = true;
-  }, [activeToolName, color]);
 
   useEffect(() => {
     if (color) {
@@ -87,8 +79,8 @@ const ColorPicker = ({
             setSelectedColor(color);
             onColorChange(color);
           } else {
-            const newColors = [...colors, color];
-            dispatch(actions.setColors(newColors, activeToolName, type, true));
+            const newColors = [color, ...colors];
+            dispatch(actions.setColors(newColors));
             setSelectedColor(color);
             onColorChange(color);
           }
@@ -97,7 +89,7 @@ const ColorPicker = ({
       getInstanceNode().removeEventListener(Events.VISIBILITY_CHANGED, onVisibilityChanged);
     };
     getInstanceNode().addEventListener(Events.VISIBILITY_CHANGED, onVisibilityChanged);
-  }, [colors?.length, dispatch, setSelectedColor, onColorChange, getCustomColorAndRemove, type, activeToolName]);
+  }, [colors?.length, dispatch, setSelectedColor, onColorChange, getCustomColorAndRemove]);
 
   const handleDelete = () => {
     const color = parseColor(selectedColor);
@@ -108,38 +100,31 @@ const ColorPicker = ({
       setSelectedColor(colors[nextIndex]);
       onColorChange(colors[nextIndex]);
       newColors.splice(indexToDelete, 1);
-      dispatch(actions.setColors(newColors, activeToolName, type, true));
+      dispatch(actions.setColors(newColors));
     }
   };
 
-  const handleCopyColor = () => {
-    const color = parseColor(selectedColor);
-    const newColors = [...colors, color];
-    dispatch(actions.setColors(newColors, activeToolName, type, true));
-  };
-
   const toggleExpanded = () => {
-    const newValue = !isExpanded;
-    setIsExpanded(newValue);
+    setIsExpanded(!isExpanded);
   };
 
-  let palette = colors.map((color) => color.toLowerCase());
+  let palette = [
+    ...colors
+  ];
   if (hasTransparentColor) {
-    palette.push(TRANSPARENT_COLOR);
+    palette.unshift(TRANSPARENT_COLOR);
+  }
+  if (selectedColor && !palette.includes(selectedColor)) {
+    palette.unshift(selectedColor);
   }
 
   if (!selectedColor) {
-    setSelectedColor('transparent');
-  }
-
-  if (palette.indexOf(selectedColor) > 6 && !isExpanded && forceExpandRef.current) {
-    setIsExpanded(true);
-    forceExpandRef.current = false;
+    setSelectedColor(palette[0]);
   }
 
   const shouldHideShowMoreButton = palette.length <= 7;
-  const showCopyButtonDisabled = !(selectedColor && !palette.includes(selectedColor));
-  const isDeleteDisabled = palette.length <= 1 || !showCopyButtonDisabled;
+  const isAddDisabled = palette.length >= 21;
+  const isDeleteDisabled = palette.length <= 1;
 
   if (!isExpanded) {
     palette = palette.slice(0, 7);
@@ -181,29 +166,22 @@ const ColorPicker = ({
       </div>
       <div className="palette-controls">
         <div className="button-container">
-          <Button
-            img="icon-header-zoom-in-line"
-            title={t('action.addNewColor')}
+          <button
+            className="control-button"
+            data-element="addCustomColor"
             onClick={handleAddColor}
+            disabled={isAddDisabled}
+          >
+            <Icon glyph="icon-header-zoom-in-line"/>
+          </button>
+          <button
             className="control-button"
-            dataElement="addCustomColor"
-          />
-          <Button
-            img="icon-delete-line"
-            title={t('action.deleteColor')}
-            onClick={handleDelete}
+            data-element="removeCustomColor"
             disabled={isDeleteDisabled}
-            className="control-button"
-            dataElement="deleteSelectedColor"
-          />
-          <Button
-            img="icon-copy2"
-            title={t('action.copySelectedColor')}
-            onClick={handleCopyColor}
-            disabled={showCopyButtonDisabled}
-            className="control-button"
-            dataElement="copySelectedColor"
-          />
+            onClick={handleDelete}
+          >
+            <Icon glyph="icon-delete-line"/>
+          </button>
         </div>
         <button className={classNames('show-more-button control-button', {
           hidden: shouldHideShowMoreButton,

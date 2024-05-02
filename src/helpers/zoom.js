@@ -1,6 +1,5 @@
 import core from 'core';
 import { getMaxZoomLevel, getMinZoomLevel } from 'constants/zoomFactors';
-import getRootNode, { getInstanceNode } from 'helpers/getRootNode';
 
 function convertZoomStepFactorsToRangesMap(zoomStepFactors) {
   const rangesMap = {};
@@ -23,10 +22,10 @@ function convertZoomStepFactorsToRangesMap(zoomStepFactors) {
 }
 
 export function getStep(currentZoomFactor) {
-  const zoomStepFactors = getInstanceNode().instance.UI.getZoomStepFactors();
+  const zoomStepFactors = window.instance.UI.getZoomStepFactors();
   const zoomFactorRangesMap = convertZoomStepFactorsToRangesMap(zoomStepFactors);
   const steps = Object.keys(zoomFactorRangesMap);
-  const step = steps.find((step) => {
+  const step = steps.find(step => {
     const zoomFactorRanges = zoomFactorRangesMap[step];
     return isCurrentZoomFactorInRange(currentZoomFactor, zoomFactorRanges);
   });
@@ -44,11 +43,9 @@ function isCurrentZoomFactorInRange(zoomFactor, ranges) {
   return zoomFactor >= rangeLowBound && zoomFactor < rangeHighBound;
 }
 
-function getViewCenterAfterScale(scale, isMultiViewerMode = false, documentViewerKey = 1) {
-  const documentContainer = isMultiViewerMode ? getRootNode().querySelector(`#DocumentContainer${documentViewerKey}`)
-    : getRootNode().querySelectorAll('.DocumentContainer')[0];
-  const documentWrapper = isMultiViewerMode ? getRootNode().querySelector(`#Document${documentViewerKey}`)
-    : getRootNode().querySelectorAll('.document')[0];
+function getViewCenterAfterScale(scale) {
+  const documentContainer = document.getElementsByClassName('DocumentContainer')[0];
+  const documentWrapper = document.getElementsByClassName('document')[0];
   const clientX = window.innerWidth / 2;
   const clientY = window.innerHeight / 2;
 
@@ -62,10 +59,10 @@ let zoomStepHistory = [];
 // Keeping track of changes to zoomFactor outside this helper functions
 let storedZoomFactor = -1;
 
-function zoomToInternal(currentZoomFactor, newZoomFactor, isMultiViewerMode = false, documentViewerKey = 1) {
+function zoomToInternal(currentZoomFactor, newZoomFactor) {
   const scale = newZoomFactor / currentZoomFactor;
-  const { x, y } = getViewCenterAfterScale(scale, isMultiViewerMode, documentViewerKey);
-  core.zoomTo(newZoomFactor, x, y, documentViewerKey);
+  const { x, y } = getViewCenterAfterScale(scale);
+  core.zoomTo(newZoomFactor, x, y);
   storedZoomFactor = newZoomFactor;
 }
 
@@ -73,14 +70,14 @@ function resetZoomStepHistory() {
   zoomStepHistory = [];
 }
 
-export function fitToWidth(documentViewerKey = 1) {
+export function fitToWidth() {
   resetZoomStepHistory();
-  core.fitToWidth(documentViewerKey);
+  core.fitToWidth();
 }
 
-export function fitToPage(documentViewerKey = 1) {
+export function fitToPage() {
   resetZoomStepHistory();
-  core.fitToPage(documentViewerKey);
+  core.fitToPage();
 }
 
 /**
@@ -106,8 +103,8 @@ export function fitToPage(documentViewerKey = 1) {
  * But as we store the step history we do 1.65 - 0.25 (value from step history) and end up to 1.4 (140%).
  * @ignore
  */
-export function zoomIn(isMultiViewerMode = false, documentViewerKey = 1) {
-  const currentZoomFactor = core.getZoom(documentViewerKey);
+export function zoomIn() {
+  const currentZoomFactor = core.getZoom();
   if (storedZoomFactor > 0 && currentZoomFactor !== storedZoomFactor) {
     // zoom level was changed by external side effect (like one of core's function to change zoom level)
     // in these cases we need to reset step history
@@ -130,15 +127,15 @@ export function zoomIn(isMultiViewerMode = false, documentViewerKey = 1) {
     zoomStepHistory.push(step);
   }
   const newZoomFactor = Math.min(currentZoomFactor + step, getMaxZoomLevel());
-  zoomToInternal(currentZoomFactor, newZoomFactor, isMultiViewerMode, documentViewerKey);
+  zoomToInternal(currentZoomFactor, newZoomFactor);
 }
 
 /**
  * See functionality from zoomIn. zoomOut works same but opposite direction.
  * @ignore
  */
-export function zoomOut(isMultiViewerMode = false, documentViewerKey = 1) {
-  const currentZoomFactor = core.getZoom(documentViewerKey);
+export function zoomOut() {
+  const currentZoomFactor = core.getZoom();
   if (storedZoomFactor > 0 && currentZoomFactor !== storedZoomFactor) {
     // zoom level was changed by external side effect (like one of core's function to change zoom level)
     // in these cases we need to reset step history
@@ -160,12 +157,12 @@ export function zoomOut(isMultiViewerMode = false, documentViewerKey = 1) {
     zoomStepHistory.push(-1 * step);
   }
   const newZoomFactor = Math.max(currentZoomFactor - step, getMinZoomLevel());
-  zoomToInternal(currentZoomFactor, newZoomFactor, isMultiViewerMode, documentViewerKey);
+  zoomToInternal(currentZoomFactor, newZoomFactor);
 }
 
-export function zoomTo(newZoomFactor, isMultiViewerMode = false, documentViewerKey = 1) {
+export function zoomTo(newZoomFactor) {
   // if user sets certain zoom level, then we reset the step history
   resetZoomStepHistory();
-  const currentZoomFactor = core.getZoom(documentViewerKey);
-  zoomToInternal(currentZoomFactor, newZoomFactor, isMultiViewerMode, documentViewerKey);
+  const currentZoomFactor = core.getZoom();
+  zoomToInternal(currentZoomFactor, newZoomFactor);
 }

@@ -10,8 +10,10 @@ import actions from 'actions';
     instance.UI.disablePageDeletionConfirmationModal();
   });
  */
-const disablePageDeletionConfirmationModal = (store) => () => {
-  store.dispatch(actions.disablePageDeletionConfirmationModal());
-};
+function disablePageDeletionConfirmationModal(store) {
+  return function disablePageDeletionConfirmationModal() {
+    store.dispatch(actions.disablePageDeletionConfirmationModal());
+  };
+}
 
 export default disablePageDeletionConfirmationModal;

@@ -3,7 +3,9 @@ import { loadViewerSample } from '../../playwright-utils';
 import path from 'path';
 
 test.describe('Reply attachments', () => {
-  test('should show in notes panel and work properly', async ({ page }) => {
+  // skipping flaky test
+  // https://apryse.atlassian.net/browse/WVR-5463
+  test.skip('should show in notes panel and work properly', async ({ page }) => {
     const { iframe, waitForInstance } = await loadViewerSample(page, 'viewing/blank');
 
     const instance = await waitForInstance();

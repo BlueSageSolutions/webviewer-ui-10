@@ -9,6 +9,7 @@ import { workerTypes } from 'constants/types';
 import { PRESET_BUTTON_TYPES } from 'constants/customizationVariables';
 import { innerItemToFlyoutItem } from 'helpers/itemToFlyoutHelper';
 import { useTranslation } from 'react-i18next';
+
 /**
  * A button that downloads the current document.
  * @name downloadButton
@@ -36,6 +37,9 @@ const DownloadButton = (props) => {
   const isDisabled = documentType === workerTypes.XOD || isOfficeEditorMode();
 
   if (isDisabled) {
+    if (isFlyoutItem) {
+      return null;
+    }
     console.warn('The download preset button is not available for XOD documents or Office Editor mode.');
   }
 

@@ -12,7 +12,7 @@ const ModularHeaderContainer = React.forwardRef((props, ref) => {
     fixedGroupedItems
   ] = useSelector(
     (state) => [
-      selectors.getActiveGroupedItems(state),
+      selectors.getCurrentGroupedItems(state),
       selectors.getFixedGroupedItems(state),
     ],
     shallowEqual
@@ -22,7 +22,7 @@ const ModularHeaderContainer = React.forwardRef((props, ref) => {
   const memoizedItems = React.useMemo(() => {
     return items?.filter((item) => {
       const itemProps = item.props || item;
-      if (itemProps.type === ITEM_TYPE.GROUPED_ITEMS && !itemProps.alwaysVisible) {
+      if (itemProps.type === ITEM_TYPE.GROUPED_ITEMS) {
         if (activeGroupedItems.length || fixedGroupedItems.length) {
           return activeGroupedItems.includes(itemProps.dataElement) || fixedGroupedItems.includes(itemProps.dataElement);
         }

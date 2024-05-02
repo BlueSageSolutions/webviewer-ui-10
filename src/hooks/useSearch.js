@@ -89,14 +89,15 @@ function useSearch(activeDocumentViewerKey) {
       documentViewer.addEventListener('searchResultsChanged', searchResultsChanged);
       documentViewer.addEventListener('searchInProgress', searchInProgressEventHandler);
     });
-    return () => {
+    return function useSearchEffectCleanup() {
       documentViewers.forEach((documentViewer) => {
-        documentViewer.removeEventListener('activeSearchResultChanged', activeSearchResultChanged);
-        documentViewer.removeEventListener('searchResultsChanged', searchResultsChanged);
-        documentViewer.removeEventListener('searchInProgress', searchInProgressEventHandler);
+        documentViewer.addEventListener('activeSearchResultChanged', activeSearchResultChanged);
+        documentViewer.addEventListener('searchResultsChanged', searchResultsChanged);
+        documentViewer.addEventListener('searchInProgress', searchInProgressEventHandler);
       });
     };
   }, [setActiveSearchResult, setActiveSearchResultIndex, setSearchStatus, dispatch, documentViewersCount, activeDocumentViewerKey]);
+
 
   return {
     searchStatus,

@@ -10,7 +10,6 @@ import actions from 'actions';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import getOverlayPositionBasedOn from 'helpers/getOverlayPositionBasedOn';
 import classNames from 'classnames';
-import getRootNode from 'helpers/getRootNode';
 
 import './ColorPickerOverlay.scss';
 
@@ -65,17 +64,18 @@ const ColorPickerOverlay = ({
     >
       <ColorPalette
         color={color}
-        property='TextColor'
+        property={'TextColor'} // arbitrary property name. this property isn't used in this file
         onStyleChange={onStyleChange}
         useMobileMinMaxWidth
       />
       <ColorPalettePicker
         color={color}
+        property={'TextColor'} // arbitrary property name. this property isn't used in this file
         onStyleChange={onStyleChange}
         enableEdit
       />
     </DataElementWrapper>,
-    getRootNode().getElementById(portalElementId),
+    document.getElementById(portalElementId),
   );
 };
 

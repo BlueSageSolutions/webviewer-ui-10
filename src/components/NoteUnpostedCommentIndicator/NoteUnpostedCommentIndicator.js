@@ -3,20 +3,19 @@ import { useTranslation } from 'react-i18next';
 import Tooltip from 'components/Tooltip';
 import Icon from 'components/Icon';
 
-const NoteUnpostedCommentIndicator = ({ annotationId, pendingEditTextMap, pendingReplyMap, pendingAttachmentMap }) => {
+const NoteUnpostedCommentIndicatorContainer = (props) => {
   const { t } = useTranslation();
+  const { annotationId, pendingEditTextMap, pendingReplyMap } = props;
   const [hasUnpostedComment, setHasUnpostedComment] = useState(false);
   const [hasUnpostedReply, setHasUnpostedReply] = useState(false);
-  const [hasUnpostedAttachment, setHasUnpostedAttachment] = useState(false);
 
   useEffect(() => {
-    setHasUnpostedComment(pendingEditTextMap[annotationId]?.length > 0);
-    setHasUnpostedReply(pendingReplyMap[annotationId]?.length > 0);
-    setHasUnpostedAttachment(pendingAttachmentMap[annotationId]?.length > 0);
-  }, [pendingEditTextMap, pendingReplyMap, pendingAttachmentMap]);
+    setHasUnpostedComment(pendingEditTextMap[annotationId]?.length > 0)
+    setHasUnpostedReply(pendingReplyMap[annotationId]?.length > 0)
+  }, [pendingEditTextMap, pendingReplyMap])
 
   return (
-    (hasUnpostedComment || hasUnpostedReply || hasUnpostedAttachment) ?
+    hasUnpostedComment || hasUnpostedReply ?
       <div data-element="unpostedCommentIndicator">
         <Tooltip content={t('message.unpostedComment')}>
           <div>
@@ -28,4 +27,4 @@ const NoteUnpostedCommentIndicator = ({ annotationId, pendingEditTextMap, pendin
   );
 };
 
-export default NoteUnpostedCommentIndicator;
+export default NoteUnpostedCommentIndicatorContainer;

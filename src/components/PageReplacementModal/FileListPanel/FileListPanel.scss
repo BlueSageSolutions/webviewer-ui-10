@@ -1,4 +1,3 @@
-@import '../../../constants/modal.scss';
 
 .FileListPanel {
   box-sizing: border-box;
@@ -7,12 +6,10 @@
   align-items: center;
   width: 100%;
   height: 100%;
+  position: absolute;
   overflow: auto;
   padding-top: 20px;
   padding-bottom: 20px;
-  background-color: var(--document-background-color);
-  border-radius: 4px;
-
   ul {
     display: flex;
     flex-wrap: wrap;
@@ -20,9 +17,8 @@
     align-content: flex-start;
     list-style: none;
     margin: 0;
-    padding: 16px;
+    padding: 0;
     height: 30em;
-    width: 100%;
 
     li.selected {
       border: 1px solid #48A4E0;
@@ -33,9 +29,9 @@
       border: 1px solid #E7EDF3;
       box-sizing: border-box;
       border-radius: 6px;
-      width: 100%;
+      width: 300px;
       height: 60px;
-      margin: 4px 0;
+      margin: .2em;
       padding: 8px 10px;
       display: flex;
       flex-direction: row;

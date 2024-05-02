@@ -14,7 +14,7 @@ class Zoom extends Item {
   constructor(props = {}) {
     super(props);
     this.type = ITEM_TYPE.ZOOM;
-    this.dataElement = props.dataElement || 'zoom-container';
+    this._dataElement = props.dataElement || 'zoom-container';
   }
 }
 

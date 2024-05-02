@@ -162,4 +162,5 @@ describe('Tests for updateLayerVisibililty', () => {
     // don't bother testing case when child layer is disabled
     // when child layer is disabled, it is not visible and it means parent is not visible
   });
+
 });

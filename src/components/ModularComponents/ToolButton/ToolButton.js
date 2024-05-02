@@ -72,11 +72,37 @@ const ToolButton = (props) => {
   const isToolInActiveGroupedItems = groupedItem && activeGroupedItems.includes(groupedItem);
   const [isButtonActive, setIsButtonActive] = useState(isActive && (isToolInActiveGroupedItems || !groupedItem));
 
+  const isToolWithPanelAssociatedActive = (toolName, activeTool) => {
+    const isDefaultToolActive = activeTool === defaultTool;
+    const isActiveToolSameOfToolName = activeTool === toolName;
+    if (isDefaultToolActive || isActiveToolSameOfToolName) {
+      if (toolName === ToolNames.SIGNATURE) {
+        return isSignatureListPanelOpen;
+      }
+      if (toolName === ToolNames.RUBBER_STAMP) {
+        return isRubberStampPanelOpen;
+      }
+    }
+    return false;
+  };
+
+  const checkIfNeedsToOpenAPanel = (toolName) => {
+    if (toolName === ToolNames.SIGNATURE) {
+      dispatch(actions.openElement(DataElements.SIGNATURE_LIST_PANEL));
+    } else if (toolName === ToolNames.RUBBER_STAMP) {
+      dispatch(actions.openElement(DataElements.RUBBER_STAMP_PANEL));
+    }
+  };
+
   useEffect(() => {
     const handleToolModeChange = (tool) => {
       // prevent edit tool from deactivating when text is hovered
       const isEditToolAndItIsActive = toolName === ToolNames.EDIT && lastPickedToolAndGroup.tool === ToolNames.EDIT;
-      if (tool.name === toolName || (isEditToolAndItIsActive && tool.name === ToolNames.TEXT_SELECT)) {
+      const isSignatureToolActive = isToolWithPanelAssociatedActive(toolName, tool.name);
+      const isRubberStampToolActive = isToolWithPanelAssociatedActive(toolName, tool.name);
+      const shouldActivateButton = tool.name === toolName || (isEditToolAndItIsActive && tool.name === ToolNames.TEXT_SELECT) || isSignatureToolActive || isRubberStampToolActive;
+
+      if (shouldActivateButton) {
         setIsButtonActive(true);
       } else {
         setIsButtonActive(false);
@@ -87,22 +113,25 @@ const ToolButton = (props) => {
     return () => {
       core.removeEventListener('toolModeUpdated', handleToolModeChange);
     };
-  }, []);
+  }, [isSignatureListPanelOpen, isRubberStampPanelOpen]);
 
   useEffect(() => {
-    const noActiveGroupedItems = !activeGroupedItems.length;
-    const isLastPickedGroupUndefined = lastPickedToolAndGroup.group?.every((group) => group === undefined);
+    const noActiveGroupedItems = !activeGroupedItems?.length;
+    const isLastPickedGroupUndefined = lastPickedToolAndGroup?.group?.every((group) => group === undefined);
     const toolDoesNotBelongToAGroupAndIsActive = !groupedItem && isLastPickedGroupUndefined && toolName === lastPickedToolAndGroup.tool;
-    const toolBelongsToAGroupAndIsActive = groupedItem && lastPickedToolAndGroup.group?.includes(groupedItem) &&
-      (toolName === lastPickedToolAndGroup.tool);
+    const toolBelongsToAGroupAndIsActive = groupedItem && lastPickedToolAndGroup?.group?.includes(groupedItem) &&
+      (toolName === lastPickedToolAndGroup?.tool);
+    const isDefaultToolActive = activeToolName === defaultTool && toolName === defaultTool;
 
     if ((toolName === ToolNames.EDIT && noActiveGroupedItems) ||
       toolDoesNotBelongToAGroupAndIsActive ||
-      toolBelongsToAGroupAndIsActive
+      toolBelongsToAGroupAndIsActive ||
+      isDefaultToolActive
     ) {
       setIsButtonActive(true);
-      if (lastPickedToolAndGroup.tool !== activeToolName) {
+      if (lastPickedToolAndGroup?.tool !== activeToolName) {
         core.setToolMode(toolName);
+        checkIfNeedsToOpenAPanel(toolName);
       }
     } else {
       setIsButtonActive(false);
@@ -112,7 +141,7 @@ const ToolButton = (props) => {
   const setToolMode = (toolName) => {
     dispatch(actions.setLastPickedToolAndGroup({
       tool: toolName,
-      group: [groupedItem]
+      group: activeGroupedItems
     }));
     core.setToolMode(toolName === ToolNames.SIGNATURE || toolName === ToolNames.RUBBER_STAMP ? defaultTool : toolName);
   };
@@ -139,12 +168,7 @@ const ToolButton = (props) => {
 
         setToolMode(defaultTool);
       } else {
-        if (toolName === ToolNames.SIGNATURE) {
-          dispatch(actions.openElement(DataElements.SIGNATURE_LIST_PANEL));
-        } else if (toolName === ToolNames.RUBBER_STAMP) {
-          dispatch(actions.openElement(DataElements.RUBBER_STAMP_PANEL));
-        }
-        dispatch(actions.setLastPickedToolForGroupedItems(groupedItem, toolName));
+        checkIfNeedsToOpenAPanel(toolName);
         setToolMode(toolName);
       }
     } else {
@@ -159,12 +183,12 @@ const ToolButton = (props) => {
     }
   };
 
-  const icon = img || toolButtonObject.img;
-  const toolTipTitle = title || toolButtonObject.title;
+  const icon = img || toolButtonObject?.img;
+  const toolTipTitle = title || toolButtonObject?.title;
   let color = '';
   let fillColor = '';
   let strokeColor = '';
-  const showColor = customOverrides?.showColor || toolButtonObject.showColor;
+  const showColor = customOverrides?.showColor || toolButtonObject?.showColor;
   if (showColor === 'always' || (showColor === 'active' && isButtonActive)) {
     const toolStyles = getToolStyles(toolName);
     color = toolStyles?.[iconColorKey]?.toHexString?.();

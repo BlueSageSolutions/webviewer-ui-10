@@ -3,7 +3,7 @@ import core from 'core';
 
 import './OfficeEditorCreateTablePopup.scss';
 
-const OfficeEditorCreateTablePopup = ({ onClose, focusViewer }) => {
+const OfficeEditorCreateTablePopup = ({ onClose }) => {
   const [rowIndex, setRowIndex] = useState(-1);
   const [columnIndex, setColumnIndex] = useState(-1);
 
@@ -20,7 +20,6 @@ const OfficeEditorCreateTablePopup = ({ onClose, focusViewer }) => {
   const onClickCell = async (i, j) => {
     await core.getOfficeEditor().insertTableAtCursor(i + 1, j + 1, 100, 'percent');
     onClose?.();
-    focusViewer?.();
   };
 
   return (

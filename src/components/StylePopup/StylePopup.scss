@@ -8,7 +8,7 @@
   width: 220px;
 
   @include mobile {
-    width: 100%;
+    width: 100vw;
   }
 
   .sliders-container {
@@ -54,10 +54,5 @@
 
   .closed {
     display: none;
-  }
-
-  .snapping-option {
-    margin-top: 10px;
-    margin-left: 2px;
   }
 }

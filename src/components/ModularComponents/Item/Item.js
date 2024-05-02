@@ -1,16 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Item = (props) => {
-  return (
-    <div {...props}></div>
-  );
-};
 
-Item.propTypes = {
-  dataElement: PropTypes.string.isRequired,
-  title: PropTypes.string,
-  disabled: PropTypes.bool,
-};
+class Item extends React.Component {
+  static propTypes = {
+    dataElement: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    disabled: PropTypes.bool,
+  };
+
+  render() {
+    return (
+      <></>
+    );
+  }
+}
 
 export default Item;

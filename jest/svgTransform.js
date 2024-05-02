@@ -15,8 +15,6 @@
 const path = require('path');
 module.exports = {
   process(src, filename) {
-    return {
-      code: `module.exports = '<svg data-filename="${path.relative(process.cwd(), filename)}" data-unit-test="svg content removed - see svgTransform.js for more info"/>'`
-    }
+    return `module.exports = '<svg data-filename="${path.relative(process.cwd(), filename)}" data-unit-test="svg content removed - see svgTransform.js for more info"/>'`;
   },
 };

@@ -2,6 +2,7 @@ import core from 'core';
 import actions from 'actions';
 import selectors from 'selectors';
 import DataElements from 'constants/dataElement';
+import defaultTool from 'constants/defaultTool';
 
 export default (dispatch, store) => (newTool, oldTool) => {
   const { ToolNames } = window.Core.Tools;
@@ -15,15 +16,22 @@ export default (dispatch, store) => (newTool, oldTool) => {
   const state = store.getState();
   const activeToolGroup = selectors.getActiveToolGroup(state);
   const activeToolName = selectors.getActiveToolName(state);
+  const selectedStampIndex = selectors.getSelectedStampIndex(state);
   // If we are in the modular UI and switch out of the rubber stamp tool, we need to re-set the active stamp index
   const isCustomizableUI = state.featureFlags.customizableUI;
 
   if (isCustomizableUI) {
-    const activeGroupedItems = state.viewer.lastPickedToolAndGroup.group;
+    const activeGroupedItems = state.viewer.activeGroupedItems;
     const isLastPickedGroupUndefined = activeGroupedItems?.every((group) => group === undefined);
 
     if (oldTool.name === ToolNames.RUBBER_STAMP) {
+      dispatch(actions.setLastSelectedStampIndex(selectedStampIndex));
       dispatch(actions.setSelectedStampIndex(null));
+    }
+    if (oldTool.name === ToolNames.RUBBER_STAMP || oldTool.name === ToolNames.SIGNATURE) {
+      if (newTool.name === defaultTool) {
+        return;
+      }
     }
     if (newTool.name === ToolNames.EDIT || isLastPickedGroupUndefined) {
       return;

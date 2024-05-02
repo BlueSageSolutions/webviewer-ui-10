@@ -45,21 +45,18 @@ const BasicTemplate = (args) => {
 };
 
 // using line annotation as "basic" test because it's has one of the most simple UI for
-const lineAnnot = new window.Core.Annotations.LineAnnotation();
+const lineAnnot = new window.Annotations.LineAnnotation();
 
 export const Basic = BasicTemplate.bind({});
 Basic.args = {
   annotations: [lineAnnot],
   style: getAnnotationStyles(lineAnnot),
   closeElement: () => { },
-  properties: {
-    StrokeStyle: 'solid'
-  },
+  properties: {},
   colorMapKey: mapAnnotationToKey(lineAnnot),
-  hasBackToMenu: true,
 };
 
-const distanceMeasurementAnnot = new window.Core.Annotations.LineAnnotation();
+const distanceMeasurementAnnot = new window.Annotations.LineAnnotation();
 distanceMeasurementAnnot['Measure'] = {
   'scale': '1 in = 1 in',
   'axis': [
@@ -116,7 +113,6 @@ export const DistanceMeasurement = BasicTemplate.bind({});
 const measurementProperties = {
   StartLineStyle: distanceMeasurementAnnot.getStartStyle(),
   EndLineStyle: distanceMeasurementAnnot.getEndStyle(),
-  StrokeStyle: 'solid'
 };
 
 DistanceMeasurement.args = {
@@ -127,7 +123,7 @@ DistanceMeasurement.args = {
   showLineStyleOptions: true,
 };
 
-const freeTextAnnot = new window.Core.Annotations.FreeTextAnnotation();
+const freeTextAnnot = new window.Annotations.FreeTextAnnotation();
 export const FreeText = BasicTemplate.bind({});
 const richTextStyles = freeTextAnnot.getRichTextStyle();
 const freeTextProperties = {
@@ -139,7 +135,6 @@ const freeTextProperties = {
   italic: richTextStyles?.[0]?.['font-style'] === 'italic' ?? false,
   underline: richTextStyles?.[0]?.['text-decoration']?.includes('underline') || richTextStyles?.[0]?.['text-decoration']?.includes('word'),
   strikeout: richTextStyles?.[0]?.['text-decoration']?.includes('line-through') ?? false,
-  StrokeStyle: 'solid',
 };
 
 FreeText.args = {
@@ -150,7 +145,7 @@ FreeText.args = {
   isFreeText: true,
 };
 
-const widgetPlaceHolderAnnot = new window.Core.Annotations.RectangleAnnotation();
+const widgetPlaceHolderAnnot = new window.Annotations.RectangleAnnotation();
 widgetPlaceHolderAnnot.isFormFieldPlaceholder = () => true;
 widgetPlaceHolderAnnot.getCustomData = () => 'TextFormField';
 
@@ -159,8 +154,6 @@ WidgetPlaceHolder.args = {
   annotations: [widgetPlaceHolderAnnot],
   style: getAnnotationStyles(widgetPlaceHolderAnnot),
   closeElement: () => { },
-  properties: {
-    StrokeStyle: 'solid'
-  },
+  properties: {},
   colorMapKey: mapAnnotationToKey(widgetPlaceHolderAnnot),
 };

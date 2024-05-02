@@ -13,7 +13,7 @@ class ViewControls extends Item {
   constructor(props = {}) {
     super(props);
     this.type = ITEM_TYPE.VIEW_CONTROLS;
-    this.dataElement = 'view-controls';
+    this._dataElement = 'view-controls';
   }
 }
 

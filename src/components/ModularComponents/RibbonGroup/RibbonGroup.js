@@ -9,10 +9,11 @@ import FlexDropdown from '../FlexDropdown';
 import { ITEM_TYPE, DIRECTION } from 'constants/customizationVariables';
 import ToggleElementButton from '../ToggleElementButton';
 import getToolbarTranslationString from 'helpers/translationKeyMapping';
-
-import './RibbonGroup.scss';
 import sizeManager, { storeSizeHook } from 'helpers/responsivnessHelper';
 import { itemToFlyout } from 'helpers/itemToFlyoutHelper';
+import Icon from 'components/Icon';
+
+import './RibbonGroup.scss';
 
 const DEFAULT_DROPDOWN_HEIGHT = 72;
 
@@ -43,10 +44,23 @@ const RibbonGroup = (props) => {
   const [itemsGap, setItemsGap] = useState(gap);
   const [containerWidth, setContainerWidth] = useState(0);
   const [ribbonItems, setRibbonItems] = useState(validateItems(items));
-  const [activeCustomRibbon, customHeadersAdditionalProperties] = useSelector((state) => [
-    selectors.getActiveCustomRibbon(state),
-    selectors.getCustomHeadersAdditionalProperties(state),
-  ]);
+  const [
+    activeCustomRibbon,
+    groupedItemsOfActiveCustomRibbon,
+    customHeadersAdditionalProperties,
+    isRibbonGroupDisabled,
+    lastPickedToolForGroupedItems,
+  ] = useSelector((state) => {
+    const activeCustomRibbon = selectors.getActiveCustomRibbon(state);
+    const groupedItemsOfActiveCustomRibbon = selectors.getGroupedItemsOfCustomRibbon(state, activeCustomRibbon);
+    return [
+      activeCustomRibbon,
+      groupedItemsOfActiveCustomRibbon,
+      selectors.getCustomHeadersAdditionalProperties(state),
+      selectors.isElementDisabled(state, dataElement),
+      selectors.getLastPickedToolForGroupedItems(state, groupedItemsOfActiveCustomRibbon),
+    ];
+  });
 
   const elementRef = useRef();
 
@@ -78,6 +92,19 @@ const RibbonGroup = (props) => {
   }, [size]);
   storeSizeHook(dataElement, size, elementRef, headerDirection);
 
+  const setActiveCustomRibbon = useCallback(
+    (ribbon) => {
+      dispatch(actions.setActiveCustomRibbon(ribbon));
+    },
+    [dispatch],
+  );
+
+  useEffect(() => {
+    if (!activeCustomRibbon) {
+      setActiveCustomRibbon(ribbonItems[0]?.toolbarGroup);
+    }
+  }, []);
+
   useEffect(() => {
     const flyout = {
       dataElement: FLYOUT_NAME,
@@ -103,24 +130,26 @@ const RibbonGroup = (props) => {
         }
       }
     }
+
     dispatch(actions.updateFlyout(FLYOUT_NAME, flyout));
     setContainerWidth(elementRef.current?.clientWidth ?? 0);
-  }, [size, activeCustomRibbon]);
+  }, [size, activeCustomRibbon, ribbonItems.length]);
 
   useEffect(() => {
     setItemsGap(gap);
   }, [gap]);
 
-  const setActiveCustomRibbon = useCallback(
-    (ribbon) => {
-      dispatch(actions.setActiveCustomRibbon(ribbon));
-    },
-    [dispatch],
-  );
-
   useEffect(() => {
     setRibbonItems(validateItems(items));
   }, [items]);
+
+  useEffect(() => {
+    dispatch(actions.setActiveGroupedItems(groupedItemsOfActiveCustomRibbon));
+    dispatch(actions.setLastPickedToolAndGroup({
+      tool: lastPickedToolForGroupedItems,
+      group: groupedItemsOfActiveCustomRibbon,
+    }));
+  }, [activeCustomRibbon]);
 
   const renderRibbonItems = () => {
     const activeIndex = ribbonItems.findIndex((item) => item.toolbarGroup === activeCustomRibbon);
@@ -150,7 +179,22 @@ const RibbonGroup = (props) => {
     }
   };
 
-  if (ribbonItems && ribbonItems.length) {
+  const renderDropdownItem = (item, getTranslatedDisplayValue) => {
+    const glyph = item.img;
+    const text = getTranslatedDisplayValue(item.label);
+    return (
+      <div className='Dropdown__item-object'>
+        {glyph &&
+          <Icon glyph={glyph} className={item.className || ''} />
+        }
+        {(text) &&
+          <span className={'Dropdown__item-text'}>{text}</span>
+        }
+      </div>
+    );
+  };
+
+  if (!isRibbonGroupDisabled && ribbonItems && ribbonItems.length) {
     return (
       <div ref={elementRef} className={'RibbonGroupContainer'} data-element={dataElement}
         style={{ display: 'flex', flexDirection: headerDirection, justifyContent: justifyContent, flexGrow: grow }}>
@@ -191,8 +235,7 @@ const RibbonGroup = (props) => {
             height={headerDirection === DIRECTION.COLUMN ? DEFAULT_DROPDOWN_HEIGHT : undefined}
             direction={headerDirection}
             placement={headerPlacement}
-            objects={validateItems(items)}
-            objectKey={'toolbarGroup'}
+            items={validateItems(items)}
             currentSelectionKey={activeCustomRibbon}
             onClickItem={(customRibbon) => {
               setActiveCustomRibbon(customRibbon);
@@ -201,9 +244,11 @@ const RibbonGroup = (props) => {
               const index = items.findIndex((el) => el.label === item);
               return items[index]?.toolbarGroup;
             }}
-            getKey = {(item) => item.toolbarGroup}
+            getKey = {(item) => item['toolbarGroup']}
             getTranslationLabel={(key) => getToolbarTranslationString(key, customHeadersAdditionalProperties)}
             arrowDirection={getArrowDirection()}
+            renderItem={renderDropdownItem}
+            renderSelectedItem={renderDropdownItem}
           />
         </div>
       </div>

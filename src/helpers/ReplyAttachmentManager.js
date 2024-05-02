@@ -8,7 +8,7 @@ const icons = {
   unknown: 'ic-file-etc'
 };
 
-const FileAttachmentUtils = window.Core.Annotations.FileAttachmentUtils;
+const FileAttachmentUtils = window.Annotations.FileAttachmentUtils;
 
 export async function decompressFileContent(file) {
   return FileAttachmentUtils.decompressWithFlateDecode(file.content, file.type);

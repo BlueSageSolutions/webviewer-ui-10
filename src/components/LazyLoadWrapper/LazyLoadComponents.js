@@ -63,6 +63,7 @@ const SignatureListPanel = lazy(() => import('components/SignatureListPanel'));
 const LeftPanel = lazy(() => import('components/LeftPanel'));
 const RubberStampPanel = lazy(() => import('components/RubberStampPanel'));
 const RedactionPanel = lazy(() => import('components/RedactionPanel'));
+const PortfolioPanel = lazy(() => import('components/PortfolioPanel'));
 
 
 const OfficeEditorToolsHeader = lazy(() => import('components/Header/OfficeEditorToolsHeader'));
@@ -120,6 +121,7 @@ const LazyLoadComponents = {
   TabPanel,
   LeftPanel,
   RedactionPanel,
+  PortfolioPanel,
   OfficeEditorToolsHeader,
   CreatePortfolioModal,
   LinkAnnotationPopup,

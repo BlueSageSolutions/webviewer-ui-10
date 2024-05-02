@@ -20,6 +20,9 @@ const NewDocumentButton = (props) => {
   const { t } = useTranslation();
 
   if (isDisabled) {
+    if (isFlyoutItem) {
+      return null;
+    }
     console.warn('The new document preset button is only available if the Office Editor mode is enabled.');
   }
 

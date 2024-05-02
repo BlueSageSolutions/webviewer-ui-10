@@ -57,7 +57,7 @@ class StatefulButton extends Item {
     this.initialState = initialState;
     this.mount = mount;
     this.unmount = unmount;
-    this.dataElement = dataElement;
+    this._dataElement = dataElement;
     this.title = title;
     this.hidden = hidden;
     this.states = states;

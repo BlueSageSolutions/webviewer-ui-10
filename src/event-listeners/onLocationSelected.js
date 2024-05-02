@@ -7,7 +7,6 @@ import SignatureModes from 'constants/signatureModes';
 export default (store, documentViewerKey) => async (_, widget) => {
   const signatureTool = core.getTool('AnnotationCreateSignature', documentViewerKey);
   const signatureMode = selectors.getSignatureMode(store.getState());
-  const { ToolNames } = window.Core.Tools;
 
   if (!(await signatureTool.isEmptySignature()) && signatureMode === SignatureModes.FULL_SIGNATURE) {
     await signatureTool.addSignature();
@@ -47,7 +46,7 @@ export default (store, documentViewerKey) => async (_, widget) => {
         store.dispatch(actions.openElement('signatureModal'));
       } else if (widget && isCustomizableUI) {
         // We set the active ribbon to the one that has the signature tool
-        store.dispatch(actions.setActiveGroupedItemWithTool(ToolNames.SIGNATURE));
+        store.dispatch(actions.setActiveGroupedItemWithCreateSignatureTool());
         const isSignatureListPanelOpen = selectors.isElementOpen(state, DataElements.SIGNATURE_LIST_PANEL);
         // If the active ribbon doesnt have the signature tool, we must switch to one that does
         if (!isSignatureListPanelOpen) {
@@ -60,7 +59,7 @@ export default (store, documentViewerKey) => async (_, widget) => {
           await signatureTool.addSignature();
         }
       } else if (!isCustomizableUI) {
-        core.setToolMode(ToolNames.SIGNATURE);
+        core.setToolMode(window.Core.Tools.ToolNames.SIGNATURE);
         const activeSavedSignatureTab = requiresInitials ? DataElements.SAVED_INTIALS_PANEL_BUTTON : DataElements.SAVED_SIGNATURES_PANEL_BUTTON;
         store.dispatch(actions.openElement('toolStylePopup'));
         store.dispatch(actions.setSelectedTab('savedSignatures', activeSavedSignatureTab));

@@ -1,5 +1,6 @@
 .TopHeader {
   width: 100%;
+  transition: min-height .3s ease-in-out;
 
   &.start {
     background: var(--gray-0);
@@ -12,7 +13,7 @@
 
 .TopHeader.closed {
   padding: 0;
-  display: none;
+  min-height: 0;
 }
 
 .TopHeader.stroke {

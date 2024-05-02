@@ -1,17 +1,16 @@
-import React, { useEffect, useRef } from 'react';
-import classNames from 'classnames';
-import { useSelector, useDispatch, shallowEqual } from 'react-redux';
-import actions from 'actions';
-import selectors from 'selectors';
-import DataElements from 'constants/dataElement';
+import React, { useEffect, useRef } from "react";
+import classNames from "classnames";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
+import actions from "actions";
+import selectors from "selectors";
 
-import './ProgressModal.scss';
+import "./ProgressModal.scss";
 
 const ProgressModal = () => {
   const [isDisabled, isOpen, loadingProgress] = useSelector(
-    (state) => [
-      selectors.isElementDisabled(state, DataElements.PROGRESS_MODAL),
-      selectors.isElementOpen(state, DataElements.PROGRESS_MODAL),
+    state => [
+      selectors.isElementDisabled(state, "progressModal"),
+      selectors.isElementOpen(state, "progressModal"),
       selectors.getLoadingProgress(state),
     ],
     shallowEqual,
@@ -23,11 +22,11 @@ const ProgressModal = () => {
     if (isOpen) {
       dispatch(
         actions.closeElements([
-          DataElements.SIGNATURE_MODAL,
-          DataElements.PRINT_MODAL,
-          DataElements.LOADING_MODAL,
-          DataElements.ERROR_MODAL,
-          DataElements.PASSWORD_MODAL,
+          "signatureModal",
+          "printModal",
+          "errorModal",
+          "loadingModal",
+          "passwordModal",
         ]),
       );
     }
@@ -53,7 +52,7 @@ const ProgressModal = () => {
         open: isOpen,
         closed: !isOpen,
       })}
-      data-element={DataElements.PROGRESS_MODAL}
+      data-element="progressModal"
     >
       <div className="container">
         <svg className="progress-ring" width="54" height="54">

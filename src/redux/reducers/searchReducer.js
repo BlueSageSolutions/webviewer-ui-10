@@ -1,16 +1,13 @@
-export default (initialState) => (state = initialState, action) => {
+export default initialState => (state = initialState, action) => {
   const { type, payload } = action;
 
   switch (type) {
     case 'SEARCH_TEXT': {
-      const { searchValue, replaceValue, options = {} } = payload;
+      const { searchValue, options = {} } = payload;
       const { caseSensitive, wholeWord, wildcard, regex, searchUp, ambientString } = options;
       return {
         ...state,
         value: searchValue,
-        replaceValue: replaceValue,
-        nextResult: null,
-        nextResultIndex: null,
         isCaseSensitive: caseSensitive || false,
         isWholeWord: wholeWord || false,
         isWildcard: wildcard || false,
@@ -37,21 +34,6 @@ export default (initialState) => (state = initialState, action) => {
       return {
         ...state,
         value: payload.value,
-        nextResult: null,
-        nextResultIndex: null,
-      };
-    }
-    case 'SET_REPLACE_VALUE': {
-      return {
-        ...state,
-        replaceValue: payload.replaceText,
-      };
-    }
-    case 'SET_NEXT_RESULT': {
-      return {
-        ...state,
-        nextResult: payload.nextResult,
-        nextResultIndex: payload.nextResultIndex,
       };
     }
     case 'ADD_RESULT': {
@@ -64,24 +46,18 @@ export default (initialState) => (state = initialState, action) => {
       return {
         ...state,
         isCaseSensitive: payload.isCaseSensitive,
-        nextResult: null,
-        nextResultIndex: null,
       };
     }
     case 'SET_WHOLE_WORD': {
       return {
         ...state,
         isWholeWord: payload.isWholeWord,
-        nextResult: null,
-        nextResultIndex: null,
       };
     }
     case 'SET_WILD_CARD': {
       return {
         ...state,
         isWildcard: payload.isWildcard,
-        nextResult: null,
-        nextResultIndex: null,
       };
     }
     case 'SET_SEARCH_ERROR': {
@@ -97,8 +73,6 @@ export default (initialState) => (state = initialState, action) => {
         isCaseSensitive: state.isCaseSensitive,
         isWholeWord: state.isWholeWord,
         isWildcard: state.isWildcard,
-        nextResult: null,
-        nextResultIndex: null,
       };
     }
     case 'SET_SEARCH_RESULTS': {

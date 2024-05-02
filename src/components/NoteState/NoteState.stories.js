@@ -1,7 +1,5 @@
 import React from 'react';
-import NoteState from './NoteState';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import NoteState from './NoteState.js';
 
 export default {
   title: 'Components/NotesPanel/NoteState',
@@ -24,29 +22,14 @@ function handleStateChange(newValue) {
   console.log('Updating with state value', newValue);
 }
 
-const initialState = {
-  viewer: {
-    disabledElements: {},
-  },
-};
-
-function rootReducer(state = initialState, action) {
-  return state;
-}
-
-const store = createStore(rootReducer);
-
 export function Basic() {
   const availableNoteStates = ['Accepted', 'Rejected', 'Cancelled', 'Completed', 'None', 'Marked', 'Unmarked'];
-  const allStates = availableNoteStates.map((state) => {
+  const allStates = availableNoteStates.map(state => {
     return (
-      <Provider store={store} key={state}>
-        <React.Fragment key={state}>
-          <span>{state}:</span>
-
-          <NoteState annotation={getAnnotationWithStatus(state)} isSelected handleStateChange={handleStateChange} />
-        </React.Fragment>
-      </Provider>
+      <React.Fragment key={state}>
+        <span>{state}:</span>
+        <NoteState annotation={getAnnotationWithStatus(state)} isSelected handleStateChange={handleStateChange} />
+      </React.Fragment>
     );
   });
   return (
@@ -64,23 +47,20 @@ export function Basic() {
 
 export function PopupOpen() {
   return (
-    <Provider store={store}>
-      <div
-        style={{
-          backgroundColor: 'white',
-          width: 100,
-          display: 'flex',
-          alignContent: 'flex-end',
-          flexDirection: 'column',
-        }}
-      >
-        <NoteState
-          annotation={getAnnotationWithStatus('Accepted')}
-          isSelected={false}
-          openOnInitialLoad
-          handleStateChange={handleStateChange}
-        />
-      </div>
-    </Provider>
+    <div style={{
+      backgroundColor: 'white',
+      width: 100,
+      display: 'flex',
+      alignContent: 'flex-end',
+      flexDirection: 'column'
+    }}
+    >
+      <NoteState
+        annotation={getAnnotationWithStatus('Accepted')}
+        isSelected={false}
+        openOnInitialLoad
+        handleStateChange={handleStateChange}
+      />
+    </div>
   );
 }

@@ -5,12 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Choice } from '@pdftron/webviewer-react-toolkit';
 import DimensionsInput from './DimensionsInput';
 import Dropdown from 'components/Dropdown';
-import PageNumberInput from 'components/PageReplacementModal/PageNumberInput';
 import core from 'core';
 import actions from 'actions';
 import { useDispatch } from 'react-redux';
-import pageNumberPlaceholder from 'constants/pageNumberPlaceholder';
-import DataElements from 'constants/dataElement';
 
 import './DocumentCropPopup.scss';
 
@@ -18,21 +15,20 @@ const DocumentCropPopup = ({
   cropAnnotation,
   cropMode,
   onCropModeChange,
+  getCropDimension,
+  setCropTop,
+  setCropBottom,
+  setCropLeft,
+  setCropRight,
   closeDocumentCropPopup,
   applyCrop,
   isCropping,
   getPageHeight,
   getPageWidth,
-  isPageRotated,
   redrawCropAnnotations,
   isInDesktopOnlyMode,
   isMobile,
-  getPageCount,
-  getCurrentPage,
-  selectedPages,
-  onSelectedPagesChange,
-  shouldShowApplyCropWarning,
-  presetCropDimensions,
+  presetCropDimensions
 }) => {
   const { t } = useTranslation();
 
@@ -42,36 +38,9 @@ const DocumentCropPopup = ({
     mobile: isMobile,
   });
 
-  const loadedDocumentPageCount = getPageCount();
-
-  const [pages, setPages] = useState('');
-
-  const handlePageNumbersChanged = (pageNumbers) => {
-    if (pageNumbers.length > 0) {
-      setPages(pageNumbers);
-    }
-  };
-
-  const handlePageNumberError = (pageNumber) => {
-    if (pageNumber) {
-      setPageNumberError(`${t('message.errorPageNumber')} ${loadedDocumentPageCount}`);
-    }
-  };
-
-  useEffect(() => {
-    const timeOutWhileTyping = setTimeout(() => {
-      onSelectedPagesChange(pages);
-      if (pages) {
-        setPageNumberError(null);
-      }
-    }, 2000);
-    return () => clearTimeout(timeOutWhileTyping);
-  }, [pages]);
-
   const cropNames = {
-    'ALL_PAGES': t('cropPopUp.allPages'),
     'SINGLE_PAGE': t('cropPopUp.singlePage'),
-    'MULTI_PAGE': t('cropPopUp.multiPage'),
+    'ALL_PAGES': t('cropPopUp.allPages'),
   };
 
   const supportedUnits = {
@@ -101,12 +70,12 @@ const DocumentCropPopup = ({
   const [isCropDimensionsContainerActive, setCropDimensionsContainerActive] = useState(false);
 
   const toggleCropDimensions = () => {
-    if (isCropping) {
+    if (cropAnnotation) {
       setCropDimensionsContainerActive(!isCropDimensionsContainerActive);
     }
   };
 
-  const convertUnitsToPt = (val) => {
+  const convertUnitsToPt = val => {
     const unitToConvertTo = unitConversions[supportedUnits[unit]];
     const pt = unitConversions['pt'];
     return (val / unitToConvertTo) * pt;
@@ -117,7 +86,7 @@ const DocumentCropPopup = ({
     return val * unitConversions[supportedUnits[unitToConvertTo]];
   };
 
-  const truncateInput = (input) => {
+  const truncateInput = input => {
     const INPUT_MAX_LENGTH = 5;
     if (input) {
       input = input.toString();
@@ -132,67 +101,49 @@ const DocumentCropPopup = ({
       }
     }
     return input;
-  };
+  }
 
   const validateInput = (input, dimension) => {
     if (input < 0) {
       return 0;
     }
 
-    const pageNumber = cropAnnotation ? cropAnnotation.getPageNumber() : getCurrentPage();
-
     if (dimension) {
       switch (dimension) {
-        case 'xOffset':
-          if (isPageRotated(pageNumber)) {
-            input = Math.min(input, convertPtToUnits(getPageHeight(pageNumber) - cropAnnotation.getWidth(), unit));
-          } else {
-            input = Math.min(input, convertPtToUnits(getPageWidth(pageNumber) - cropAnnotation.getWidth(), unit));
-          }
+        case 'left':
+          input = Math.min(input, convertPtToUnits(getPageWidth(cropAnnotation.getPageNumber()) - getCropDimension('right'), unit));
           break;
-        case 'width':
-          if (isPageRotated(pageNumber)) {
-            input = Math.min(input, convertPtToUnits(getPageHeight(pageNumber) - cropAnnotation.getX(), unit));
-          } else {
-            input = Math.min(input, convertPtToUnits(getPageWidth(pageNumber) - cropAnnotation.getX(), unit));
-          }
+        case 'right':
+          input = Math.min(input, convertPtToUnits(getPageWidth(cropAnnotation.getPageNumber()) - getCropDimension('left'), unit));
           break;
-        case 'yOffset':
-          if (isPageRotated(pageNumber)) {
-            input = Math.min(input, convertPtToUnits(getPageWidth(pageNumber) - cropAnnotation.getHeight(), unit));
-          } else {
-            input = Math.min(input, convertPtToUnits(getPageHeight(pageNumber) - cropAnnotation.getHeight(), unit));
-          }
+        case 'top':
+          input = Math.min(input, convertPtToUnits(getPageHeight(cropAnnotation.getPageNumber()) - getCropDimension('bottom'), unit));
           break;
-        case 'height':
-          if (isPageRotated(pageNumber)) {
-            input = Math.min(input, convertPtToUnits(getPageWidth(pageNumber) - cropAnnotation.getY(), unit));
-          } else {
-            input = Math.min(input, convertPtToUnits(getPageHeight(pageNumber) - cropAnnotation.getY(), unit));
-          }
+        case 'bottom':
+          input = Math.min(input, convertPtToUnits(getPageHeight(cropAnnotation.getPageNumber()) - getCropDimension('top'), unit));
           break;
       }
     }
 
-    input = Math.max(Number(input), 0);
+    input = Number(input);
 
     return input;
   };
 
-  const [yOffset, setYOffset] = useState();
-  const [height, setHeight] = useState();
-  const [xOffset, setXOffset] = useState();
-  const [width, setWidth] = useState();
+  const [top, setTop] = useState();
+  const [bottom, setBottom] = useState();
+  const [left, setLeft] = useState();
+  const [right, setRight] = useState();
 
   useEffect(() => {
     if (cropAnnotation) {
       // when user changes the input units or adjusts the crop annotation using the mouse, the input fields need to be updated
       onUnitChange(unit);
       const onCropAnnotationChanged = () => {
-        setYOffset(Math.max(0, truncateInput(convertPtToUnits(cropAnnotation.getY(), unit))));
-        setHeight(Math.max(0, truncateInput(convertPtToUnits(cropAnnotation.getHeight(), unit))));
-        setXOffset(Math.max(0, truncateInput(convertPtToUnits(cropAnnotation.getX(), unit))));
-        setWidth(Math.max(0, truncateInput(convertPtToUnits(cropAnnotation.getWidth(), unit))));
+        setTop(truncateInput(convertPtToUnits(getCropDimension('top'), unit)));
+        setBottom(truncateInput(convertPtToUnits(getCropDimension('bottom'), unit)));
+        setLeft(truncateInput(convertPtToUnits(getCropDimension('left'), unit)));
+        setRight(truncateInput(convertPtToUnits(getCropDimension('right'), unit)));
 
         setAutoTrimActive(false);
       };
@@ -212,10 +163,10 @@ const DocumentCropPopup = ({
   useEffect(() => {
     if (cropAnnotation) {
       const onPagesUpdated = () => {
-        setYOffset(truncateInput(convertPtToUnits(cropAnnotation.getY(), unit)));
-        setHeight(truncateInput(convertPtToUnits(cropAnnotation.getHeight(), unit)));
-        setXOffset(truncateInput(convertPtToUnits(cropAnnotation.getX(), unit)));
-        setWidth(truncateInput(convertPtToUnits(cropAnnotation.getWidth(), unit)));
+        setTop(truncateInput(convertPtToUnits(getCropDimension('top'), unit)));
+        setBottom(truncateInput(convertPtToUnits(getCropDimension('bottom'), unit)));
+        setLeft(truncateInput(convertPtToUnits(getCropDimension('left'), unit)));
+        setRight(truncateInput(convertPtToUnits(getCropDimension('right'), unit)));
       };
       core.addEventListener('pagesUpdated', onPagesUpdated);
 
@@ -226,28 +177,23 @@ const DocumentCropPopup = ({
   }, []);
 
   const onDimensionChange = (input, position) => {
-    if (!input) {
-      input = 0;
-    }
-
     input = validateInput(input, position);
-
     switch (position) {
-      case 'yOffset':
-        cropAnnotation.setY(convertUnitsToPt(input));
-        setYOffset(truncateInput(input));
+      case 'top':
+        setCropTop(convertUnitsToPt(input));
+        setTop(truncateInput(input));
         break;
-      case 'height':
-        cropAnnotation.setHeight(convertUnitsToPt(input));
-        setHeight(truncateInput(input));
+      case 'bottom':
+        setCropBottom(convertUnitsToPt(input));
+        setBottom(truncateInput(input));
         break;
-      case 'xOffset':
-        cropAnnotation.setX(convertUnitsToPt(input));
-        setXOffset(truncateInput(input));
+      case 'left':
+        setCropLeft(convertUnitsToPt(input));
+        setLeft(truncateInput(input));
         break;
-      case 'width':
-        cropAnnotation.setWidth(convertUnitsToPt(input));
-        setWidth(truncateInput(input));
+      case 'right':
+        setCropRight(convertUnitsToPt(input));
+        setRight(truncateInput(input));
         break;
     }
     if (cropAnnotation) {
@@ -255,49 +201,51 @@ const DocumentCropPopup = ({
     }
   };
 
-  const onUnitChange = (unit) => {
+  const onUnitChange = unit => {
     setUnit(unit);
-    setYOffset(truncateInput(convertPtToUnits(cropAnnotation.getY(), unit)));
-    setHeight(truncateInput(convertPtToUnits(cropAnnotation.getHeight(), unit)));
-    setXOffset(truncateInput(convertPtToUnits(cropAnnotation.getX(), unit)));
-    setWidth(truncateInput(convertPtToUnits(cropAnnotation.getWidth(), unit)));
+    setTop(truncateInput(convertPtToUnits(getCropDimension('top'), unit)));
+    setBottom(truncateInput(convertPtToUnits(getCropDimension('bottom'), unit)));
+    setLeft(truncateInput(convertPtToUnits(getCropDimension('left'), unit)));
+    setRight(truncateInput(convertPtToUnits(getCropDimension('right'), unit)));
   };
 
-  const onAutoTrimChange = (autoTrim) => {
+  const onAutoTrimChange = autoTrim => {
     if (autoTrim) {
       setAutoTrim(autoTrim);
-      setAutoTrimActive(true);
 
-      const y = autoTrimDimensions[autoTrim]['yOffset'] * unitConversions[supportedUnits[unit]];
-      const h = Math.max(0, autoTrimDimensions[autoTrim]['height'] * unitConversions[supportedUnits[unit]]);
-      const x = autoTrimDimensions[autoTrim]['xOffset'] * unitConversions[supportedUnits[unit]];
-      const w = Math.max(0, autoTrimDimensions[autoTrim]['width'] * unitConversions[supportedUnits[unit]]);
+      const pageWidth = convertPtToUnits(getPageWidth(cropAnnotation.getPageNumber()), unit);
+      const pageHeight = convertPtToUnits(getPageHeight(cropAnnotation.getPageNumber()), unit);
 
-      cropAnnotation.setY(convertUnitsToPt(y));
-      setYOffset(truncateInput(y));
-      cropAnnotation.setX(convertUnitsToPt(x));
-      setXOffset(truncateInput(x));
-      cropAnnotation.setHeight(convertUnitsToPt(h));
-      setHeight(truncateInput(h));
-      cropAnnotation.setWidth(convertUnitsToPt(w));
-      setWidth(truncateInput(w));
+      const pageRotation = documentViewer.getDocument().getPageRotation(cropAnnotation.getPageNumber());
 
-      if (cropAnnotation) {
-        redrawCropAnnotations(cropAnnotation.getRect());
-      }
+      const topTrim = autoTrimDimensions[autoTrim]['yOffset'] * unitConversions[supportedUnits[unit]];
+      const bottomTrim = Math.max(
+        0,
+        pageHeight - autoTrimDimensions[autoTrim]['height'] * unitConversions[supportedUnits[unit]],
+      );
+      const leftTrim = autoTrimDimensions[autoTrim]['xOffset'] * unitConversions[supportedUnits[unit]];
+      const rightTrim = Math.max(
+        0,
+        pageWidth - autoTrimDimensions[autoTrim]['width'] * unitConversions[supportedUnits[unit]],
+      );
+
+      onDimensionChange(topTrim, 'top');
+      onDimensionChange(bottomTrim, pageRotation % 180 === 0 ? 'bottom' : 'right');
+      onDimensionChange(leftTrim, 'left');
+      onDimensionChange(rightTrim, pageRotation % 180 === 0 ? 'right' : 'bottom');
     } else {
       // if no auto-trim is chosen or if auto-trim gets disabled by adjusting the crop dimensions, reset it
       setAutoTrim(undefined);
     }
   };
 
-  const handleButtonPressed = (button) => {
+  const handleButtonPressed = button => {
     switch (button) {
       case 'apply':
-        shouldShowApplyCropWarning ? openCropConfirmationWarning() : applyCrop();
+        openCropConfirmationWarning();
         break;
       case 'cancel':
-        isCropping ? openCropCancellationWarning() : closeDocumentCropPopup();
+        openCropCancellationWarning();
         break;
     }
   };
@@ -330,33 +278,17 @@ const DocumentCropPopup = ({
     dispatch(actions.showWarningMessage(cancellationWarning));
   };
 
-  const [pageNumberError, setPageNumberError] = useState('');
-
   if (isMobile && !isInDesktopOnlyMode) {
     return (
-      <div className={className} data-element={DataElements.DOCUMENT_CROP_POPUP}>
+      <div className={className}>
         <div className="document-crop-mobile-section">
           <div className="document-crop-mobile-container">
             <div className="custom-select document-crop-selector">
               <Dropdown
                 items={Object.values(cropNames)}
-                onClickItem={(e) => onCropModeChange(Object.keys(cropNames).find((key) => cropNames[key] === e))}
+                onClickItem={e => onCropModeChange(Object.keys(cropNames).find(key => cropNames[key] === e))}
                 currentSelectionKey={cropNames[cropMode]}
               />
-              {cropMode === 'MULTI_PAGE' && (
-                <div className="document-crop-page-input-container">
-                  <PageNumberInput
-                    data-element="multiPageCropPageNumberInput"
-                    selectedPageNumbers={selectedPages}
-                    pageCount={loadedDocumentPageCount}
-                    onSelectedPageNumbersChange={handlePageNumbersChanged}
-                    onBlurHandler={null}
-                    placeHolder={pageNumberPlaceholder}
-                    onError={handlePageNumberError}
-                  />
-                </div>
-              )}
-              {pageNumberError && <div className="page-number-error">{pageNumberError}</div>}
             </div>
             <button
               className="save-button"
@@ -379,7 +311,7 @@ const DocumentCropPopup = ({
     );
   }
   return (
-    <div className={className} data-element={DataElements.DOCUMENT_CROP_POPUP}>
+    <div className={className}>
       <div className="document-crop-section">
         <span className="menu-title">{t('cropPopUp.title')}</span>
         <Choice
@@ -389,7 +321,7 @@ const DocumentCropPopup = ({
           onChange={() => onCropModeChange('ALL_PAGES')}
           checked={cropMode === 'ALL_PAGES'}
           radio
-        />
+        ></Choice>
         <Choice
           label={t('cropPopUp.singlePage')}
           name="SINGLE_PAGE"
@@ -397,52 +329,24 @@ const DocumentCropPopup = ({
           onChange={() => onCropModeChange('SINGLE_PAGE')}
           checked={cropMode === 'SINGLE_PAGE'}
           radio
-        />
-        <Choice
-          label={t('cropPopUp.multiPage')}
-          name="MULTI_PAGE"
-          data-element="multiPageCropRadioButton"
-          onChange={() => onCropModeChange('MULTI_PAGE')}
-          checked={cropMode === 'MULTI_PAGE'}
-          radio
-        />
-        {cropMode === 'MULTI_PAGE' && (
-          <div className="document-crop-page-input-container">
-            <PageNumberInput
-              data-element="multiPageCropPageNumberInput"
-              selectedPageNumbers={selectedPages}
-              pageCount={loadedDocumentPageCount}
-              onSelectedPageNumbersChange={handlePageNumbersChanged}
-              onBlurHandler={null}
-              placeHolder={pageNumberPlaceholder}
-              onError={handlePageNumberError}
-            />
-          </div>
-        )}
-        {pageNumberError && <div className="page-number-error">{pageNumberError}</div>}
+        ></Choice>
       </div>
-      <div className={isCropping && cropAnnotation ? 'crop-active' : 'crop-inactive'}>
+      <div hidden={!isCropping}>
         <div className="divider" />
         <div className="document-crop-section">
-          <div
-            className="collapsible-menu"
-            style={{ pointerEvents: isCropping ? 'all' : 'none' }}
-            onClick={toggleCropDimensions}
-            onTouchStart={toggleCropDimensions}
-          >
+          <div className="collapsible-menu" onClick={toggleCropDimensions}>
             <div className="menu-title">{t('cropPopUp.cropDimensions')}</div>
             <Icon
               data-testid="collapsible-menu-icon"
-              className={isCropping ? 'crop-active' : 'crop-inactive'}
-              glyph={`icon-chevron-${isCropDimensionsContainerActive && cropAnnotation ? 'up' : 'down'}`}
+              glyph={`icon-chevron-${isCropDimensionsContainerActive ? 'up' : 'down'}`}
             />
           </div>
-          {isCropDimensionsContainerActive && cropAnnotation && (
+          {isCropDimensionsContainerActive && (
             <DimensionsInput
-              yOffset={yOffset}
-              height={height}
-              xOffset={xOffset}
-              width={width}
+              top={top}
+              bottom={bottom}
+              left={left}
+              right={right}
               unit={unit}
               autoTrim={autoTrim}
               supportedUnits={supportedUnits}
@@ -465,7 +369,7 @@ const DocumentCropPopup = ({
           className="save-button"
           data-element="cropApplyButton"
           onClick={() => handleButtonPressed('apply')}
-          disabled={!isCropping || pageNumberError}
+          disabled={!isCropping}
         >
           {t('action.apply')}
         </button>

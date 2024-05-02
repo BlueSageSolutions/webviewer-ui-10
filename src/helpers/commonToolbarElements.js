@@ -6,11 +6,10 @@ export const undoButton = {
   dataElement: 'undoButton',
   title: 'action.undo',
   img: 'icon-operation-undo',
-  onClick: (activeDocumentViewerKey) => {
-    core.undo(activeDocumentViewerKey);
+  onClick: () => {
+    core.undo();
   },
-  shouldPassActiveDocumentViewerKeyToOnClickHandler: true,
-  isNotClickableSelector: (state) => !state.viewer.canUndo[state.viewer.activeDocumentViewerKey]
+  isNotClickableSelector: state => !state.viewer.canUndo
 };
 
 export const redoButton = {
@@ -18,9 +17,8 @@ export const redoButton = {
   dataElement: 'redoButton',
   title: 'action.redo',
   img: 'icon-operation-redo',
-  onClick: (activeDocumentViewerKey) => {
-    core.redo(activeDocumentViewerKey);
+  onClick: () => {
+    core.redo();
   },
-  shouldPassActiveDocumentViewerKeyToOnClickHandler: true,
-  isNotClickableSelector: (state) => !state.viewer.canRedo[state.viewer.activeDocumentViewerKey]
+  isNotClickableSelector: state => !state.viewer.canRedo
 };

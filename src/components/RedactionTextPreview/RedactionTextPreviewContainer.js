@@ -4,8 +4,9 @@ import selectors from 'selectors';
 import NoteTextPreview from '../NoteTextPreview/NoteTextPreview';
 
 const RedactionTextPreviewContainer = (props) => {
+
   const [redactionPanelWidth] = useSelector(
-    (state) => [
+    state => [
       selectors.getRedactionPanelWidth(state),
     ],
     shallowEqual,
@@ -16,4 +17,4 @@ const RedactionTextPreviewContainer = (props) => {
   );
 };
 
-export default RedactionTextPreviewContainer;
+export default RedactionTextPreviewContainer

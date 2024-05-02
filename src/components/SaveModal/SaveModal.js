@@ -1,4 +1,7 @@
-import React, { useEffect, useState, } from 'react';
+import React, {
+  useEffect,
+  useState,
+} from 'react';
 import { useSelector, useDispatch, useStore } from 'react-redux';
 import selectors from 'selectors';
 import actions from 'actions';
@@ -101,20 +104,9 @@ const SaveModal = () => {
         setPageCount(core.getTotalPages(activeDocumentViewerKey));
       }
     };
-    const documentUnloaded = () => {
-      setFilename('');
-      setPageCount(0);
-      setFileTypes(initalFileTypes);
-      setFiletype(initalFileTypes[0]);
-      dispatch(actions.closeElement(DataElements.SAVE_MODAL));
-    };
     updateFile();
-    core.addEventListener('documentUnloaded', documentUnloaded, undefined, activeDocumentViewerKey);
     core.addEventListener('documentLoaded', updateFile, undefined, activeDocumentViewerKey);
-    return () => {
-      core.removeEventListener('documentUnloaded', documentUnloaded, activeDocumentViewerKey);
-      core.removeEventListener('documentLoaded', updateFile, activeDocumentViewerKey);
-    };
+    return () => core.removeEventListener('documentLoaded', updateFile, activeDocumentViewerKey);
   }, [activeDocumentViewerKey]);
 
   useEffect(() => {
@@ -183,8 +175,9 @@ const SaveModal = () => {
       pages,
       store,
     }, activeDocumentViewerKey);
-
-    closeModal();
+    if (isOfficeEditorMode()) {
+      closeModal();
+    }
   };
 
   const [hasTyped, setHasTyped] = useState(false);
@@ -210,7 +203,7 @@ const SaveModal = () => {
                   onChange={onFilenameChange}
                   value={filename}
                   fillWidth="false"
-                  messageText={filename === '' ? t('saveModal.fileNameCannotBeEmpty') : ''}
+                  messageText={filename === '' ? t('saveModal.fileNameCannotBeEmpty') : '' }
                   message={filename === '' ? 'warning' : 'default'}
                 />
               </div>

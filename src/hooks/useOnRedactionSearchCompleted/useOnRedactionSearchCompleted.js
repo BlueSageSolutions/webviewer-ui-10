@@ -6,10 +6,11 @@ import { redactionTypeMap } from 'constants/redactionTypes';
 import SearchStatus from 'constants/searchStatus';
 
 function useOnRedactionSearchCompleted() {
+
   const [searchStatus, setSearchStatus] = useState(SearchStatus['SEARCH_NOT_INITIATED']);
   const [redactionSearchResults, setRedactionSearchResults] = useState([]);
   const [isProcessingRedactionResults, setIsProcessingRedactionResults] = useState(false);
-  const redactionSearchPatterns = useSelector((state) => selectors.getRedactionSearchPatterns(state), shallowEqual);
+  const redactionSearchPatterns = useSelector(state => selectors.getRedactionSearchPatterns(state), shallowEqual);
 
   const searchPatterns = useMemo(() => {
     return Object.keys(redactionSearchPatterns).reduce((map, key) => {
@@ -19,7 +20,7 @@ function useOnRedactionSearchCompleted() {
         icon
       };
       return map;
-    }, {});
+    }, {})
   }, [redactionSearchPatterns]);
 
   const mapResultToType = useCallback((result) => {
@@ -27,7 +28,7 @@ function useOnRedactionSearchCompleted() {
     const { resultStr } = result;
     const searchPatternKeys = Object.keys(searchPatterns);
 
-    const resultType = searchPatternKeys.find((key) => {
+    const resultType = searchPatternKeys.find(key => {
       const { regex } = searchPatterns[key];
       return regex.test(resultStr);
     });
@@ -38,7 +39,8 @@ function useOnRedactionSearchCompleted() {
     const { icon = 'icon-form-field-text' } = searchPatterns[result.type] || {};
     result.icon = icon;
     return result;
-  }, [searchPatterns]);// Dependency is an object but it is memoized so it will not re-create unless the patterns change
+
+  }, [searchPatterns]);//Dependency is an object but it is memoized so it will not re-create unless the patterns change
 
   const clearRedactionSearchResults = useCallback(() => {
     setRedactionSearchResults([]);
@@ -50,13 +52,13 @@ function useOnRedactionSearchCompleted() {
     function onSearchResultsChanged(results) {
       const mappedResults = results.map(mapResultToType);
       setIsProcessingRedactionResults(true);
-      setRedactionSearchResults(mappedResults);
-    }
+      setRedactionSearchResults(mappedResults)
+    };
 
     core.addEventListener('searchResultsChanged', onSearchResultsChanged);
     return () => {
       core.removeEventListener('searchResultsChanged', onSearchResultsChanged);
-    };
+    }
   }, [searchStatus]);
 
   useEffect(() => {
@@ -73,7 +75,7 @@ function useOnRedactionSearchCompleted() {
         // the NO RESULTS message before showing actual results.
         setTimeout(() => {
           setIsProcessingRedactionResults(false);
-        }, 100);
+        }, 100)
       }
     }
 
@@ -81,7 +83,7 @@ function useOnRedactionSearchCompleted() {
 
     return () => {
       core.removeEventListener('searchInProgress', searchInProgressEventHandler);
-    };
+    }
   }, []);
 
   return {
@@ -89,7 +91,7 @@ function useOnRedactionSearchCompleted() {
     isProcessingRedactionResults,
     clearRedactionSearchResults,
     searchStatus,
-  };
-}
+  }
+};
 
 export default useOnRedactionSearchCompleted;

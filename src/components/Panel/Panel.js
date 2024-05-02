@@ -6,12 +6,14 @@ import { isMobileSize } from 'helpers/getDeviceSize';
 import Icon from 'components/Icon';
 import actions from 'actions';
 import './Panel.scss';
-import { panelMinWidth, RESIZE_BAR_WIDTH } from 'constants/panel';
+import { panelMinWidth, panelNames, RESIZE_BAR_WIDTH } from 'constants/panel';
 import ResizeBar from 'components/ResizeBar';
 import { isIE } from 'helpers/device';
+import MobilePanelWrapper from '../ModularComponents/MobilePanelWrapper';
+import PropTypes from 'prop-types';
 
-const Panel = (props) => {
-  const { isCustom, dataElement, location } = props;
+const DesktopPanel = ({ children }) => {
+  const { dataElement, isCustom, location } = children.props;
   const isMobile = isMobileSize();
 
   const [
@@ -49,6 +51,7 @@ const Panel = (props) => {
   } else {
     style = { minWidth: `${panelMinWidth}px` };
   }
+
   const isVisible = !(!isOpen || isDisabled);
   const isLeftSide = !location ? true : location === 'left';
   const isRightSide = location === 'right';
@@ -69,50 +72,91 @@ const Panel = (props) => {
     dispatch(actions.setPanelWidth(dataElement, Math.min(_width, maxAllowedWidth)));
   };
 
+  return (
+    <div
+      className={classNames({
+        'flx-Panel': true,
+        'closed': !isVisible,
+        'left': isLeftSide,
+        'right': isRightSide,
+        'tools-header-open': customizableUI ? activeTopHeaders.length === 2 : legacyToolsHeaderOpen,
+        'tools-header-and-header-hidden': customizableUI ? activeTopHeaders.length === 0 : legacyAllHeadersHidden,
+        'logo-bar-enabled': isLogoBarEnabled,
+      })}
+      data-element={dataElement}
+    >
+      {isCustom && location === 'right' && !isInDesktopOnlyMode && !isMobile &&
+        <ResizeBar minWidth={panelMinWidth} dataElement={`${dataElement}ResizeBar`} onResize={onResize}
+          leftDirection={true} />}
+      <div className={`flx-Panel-container ${dataElement}`} style={style}>
+        {!isInDesktopOnlyMode && isMobile && (
+          <div className="close-container">
+            <div
+              className="close-icon-container"
+              onClick={() => {
+                dispatch(actions.closeElements([dataElement]));
+              }}
+            >
+              <Icon glyph="ic_close_black_24px" className="close-icon" />
+            </div>
+          </div>
+        )}
+        {children}
+      </div>
+      {isCustom && location === 'left' && !isInDesktopOnlyMode && !isMobile &&
+        <ResizeBar minWidth={panelMinWidth} dataElement={`${dataElement}ResizeBar`} onResize={onResize} />}
+    </div>
+  );
+};
+
+DesktopPanel.propTypes = {
+  children: PropTypes.shape({
+    props: PropTypes.shape({
+      dataElement: PropTypes.string.isRequired,
+      isCustom: PropTypes.bool,
+      location: PropTypes.string,
+    }),
+  }),
+};
+
+const Panel = (props) => {
+  const { isCustom, dataElement, location } = props;
+  const isMobile = isMobileSize();
+
+  const [isOpen] = useSelector((state) => [selectors.isElementOpen(state, dataElement)]);
+  const dispatch = useDispatch();
+
   const children = React.cloneElement(props.children, {
-    isCustomPanel: true,
     dataElement: dataElement,
-    isCustomPanelOpen: isVisible,
-    isLeftSide: isLeftSide,
+    isCustom: isCustom,
+    location: location,
   });
 
-  return (
-    <>
-      <div
-        className={classNames({
-          'flx-Panel': true,
-          'closed': !isVisible,
-          'left': isLeftSide,
-          'right': isRightSide,
-          'tools-header-open': customizableUI ? activeTopHeaders.length === 2 : legacyToolsHeaderOpen,
-          'tools-header-and-header-hidden': customizableUI ? activeTopHeaders.length === 0 : legacyAllHeadersHidden,
-          'logo-bar-enabled': isLogoBarEnabled,
-        })}
-        data-element={dataElement}
-      >
-        {isCustom && location === 'right' && !isInDesktopOnlyMode && !isMobile &&
-          <ResizeBar minWidth={panelMinWidth} dataElement={`${dataElement}ResizeBar`} onResize={onResize}
-            leftDirection={true} />}
-        <div className={`flx-Panel-container ${dataElement}`} style={style}>
-          {!isInDesktopOnlyMode && isMobile && (
-            <div className="close-container">
-              <div
-                className="close-icon-container"
-                onClick={() => {
-                  dispatch(actions.closeElements([dataElement]));
-                }}
-              >
-                <Icon glyph="ic_close_black_24px" className="close-icon" />
-              </div>
-            </div>
-          )}
-          {children}
-        </div>
-        {isCustom && location === 'left' && !isInDesktopOnlyMode && !isMobile &&
-          <ResizeBar minWidth={panelMinWidth} dataElement={`${dataElement}ResizeBar`} onResize={onResize} />}
-      </div>
-    </>
-  );
+  const panelsWithMobileVersion = [panelNames.SIGNATURE_LIST, panelNames.RUBBER_STAMP, panelNames.STYLE];
+
+  if (isOpen) {
+    if (isMobile && panelsWithMobileVersion.includes(dataElement)) {
+      dispatch(actions.openElement('MobilePanelWrapper'));
+      return (
+        <MobilePanelWrapper>
+          {props.children}
+        </MobilePanelWrapper>
+      );
+    }
+    return (
+      <DesktopPanel>
+        {children}
+      </DesktopPanel>
+    );
+  }
+  return null;
+};
+
+Panel.propTypes = {
+  children: PropTypes.node,
+  isCustom: PropTypes.bool,
+  dataElement: PropTypes.string,
+  location: PropTypes.string,
 };
 
 export default Panel;

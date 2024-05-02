@@ -36,3 +36,11 @@ export const OFFICE_NUMBER_OPTIONS = [
   { enum: OfficeEditorListStylePresets.LATIN_ROMAN, img: 'icon-office-editor-list-style-latin-roman' },
   { enum: OfficeEditorListStylePresets.ROMAN_LATIN_NUMBER, img: 'icon-office-editor-list-style-roman-latin' },
 ];
+
+export const OFFICE_EDITOR_TRACKED_CHANGE_KEY = 'officeEditorTrackedChangeUID';
+
+export const OFFICE_EDITOR_EDIT_MODE = {
+  EDITING: 'editing',
+  REVIEWING: 'reviewing',
+  VIEW_ONLY: 'viewOnly'
+};

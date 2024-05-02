@@ -1,20 +1,27 @@
 import React, { useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch, useSelector, shallowEqual, useStore } from 'react-redux';
 import DataElementWrapper from '../DataElementWrapper';
 import defaultTool from 'constants/defaultTool';
+import DataElements from 'constants/dataElement';
+import SignatureModes from 'constants/signatureModes';
+import { PANEL_SIZES, panelNames } from 'constants/panel';
+import { isMobileSize } from 'helpers/getDeviceSize';
+import setToolModeAndGroup from 'helpers/setToolModeAndGroup';
 import selectors from 'selectors';
 import actions from 'actions';
+import classNames from 'classnames';
 import './SignatureListPanel.scss';
 import Divider from '../ModularComponents/Divider';
-import SignatureModes from 'constants/signatureModes';
 import SavedSignatures from './SavedSignatures';
 import SignatureAddButton from './SignatureAddButton';
 import core from 'core';
-import DataElements from 'constants/dataElement';
+import PropTypes from 'prop-types';
+import Events from 'constants/events';
 
-const SignatureListPanel = () => {
+const SignatureListPanel = ({ panelSize }) => {
   const [t] = useTranslation();
+  const isMobile = isMobileSize();
 
   const [
     savedSignatures,
@@ -24,6 +31,7 @@ const SignatureListPanel = () => {
     savedInitials,
     selectedSignatureIndex,
     signatureMode,
+    mobilePanelSize
   ] = useSelector(
     (state) => [
       selectors.getSavedSignatures(state),
@@ -33,11 +41,13 @@ const SignatureListPanel = () => {
       selectors.getSavedInitials(state),
       selectors.getSelectedDisplayedSignatureIndex(state),
       selectors.getSignatureMode(state),
-
+      selectors.getMobilePanelSize(state),
     ],
     shallowEqual,
   );
-  const signatureToolArray = core.getToolsFromAllDocumentViewers('AnnotationCreateSignature');
+  const store = useStore();
+  const TOOL_NAME = 'AnnotationCreateSignature';
+  const signatureToolArray = core.getToolsFromAllDocumentViewers(TOOL_NAME);
 
   useEffect(() => {
     return () => {
@@ -48,7 +58,6 @@ const SignatureListPanel = () => {
       }
     };
   }, []);
-
 
   // Saved signatures and initials are now in a single object. Merge them
   const [savedSignaturesAndInitials, setSavedSignaturesAndInitials] = React.useState([]);
@@ -63,13 +72,37 @@ const SignatureListPanel = () => {
     setSavedSignaturesAndInitials(mergedSignaturesAndInitals);
   }, [savedSignatures, savedInitials, displayedSignaturesFilterFunction]);
 
+  useEffect(() => {
+    if (mobilePanelSize !== PANEL_SIZES.SMALL_SIZE && isMobile) {
+      dispatch(actions.setMobilePanelSize(PANEL_SIZES.SMALL_SIZE));
+    }
+  }, [selectedSignatureIndex]);
+
+  useEffect(() => {
+    const onVisibilityChanged = (e) => {
+      const activeTool = core.getToolMode();
+      const activeToolName = activeTool?.name;
+      const { element, isVisible } = e.detail;
+      if (element === panelNames.SIGNATURE_LIST && !isVisible) {
+        if (activeToolName === TOOL_NAME || activeToolName === defaultTool) {
+          setToolModeAndGroup(store, defaultTool);
+        }
+      }
+    };
+
+    window.addEventListener(Events.VISIBILITY_CHANGED, onVisibilityChanged);
+    return () => {
+      window.removeEventListener(Events.VISIBILITY_CHANGED, onVisibilityChanged);
+    };
+  }, []);
+
   const dispatch = useDispatch();
 
   const setSignature = useCallback(async (index) => {
     const { fullSignature } = savedSignaturesAndInitials[index];
     const { annotation } = fullSignature;
     dispatch(actions.setSelectedDisplayedSignatureIndex(index));
-    core.setToolMode('AnnotationCreateSignature');
+    core.setToolMode(TOOL_NAME);
     for (const signatureTool of signatureToolArray) {
       await signatureTool.setSignature(annotation);
       if (signatureTool.hasLocation()) {
@@ -85,7 +118,7 @@ const SignatureListPanel = () => {
     const { initials } = savedSignaturesAndInitials[index];
     const { annotation } = initials;
     dispatch(actions.setSelectedDisplayedSignatureIndex(index));
-    core.setToolMode('AnnotationCreateSignature');
+    core.setToolMode(TOOL_NAME);
     for (const signatureTool of signatureToolArray) {
       await signatureTool.setInitials(annotation);
       if (signatureTool.hasLocation()) {
@@ -128,7 +161,14 @@ const SignatureListPanel = () => {
 
 
   return (
-    <DataElementWrapper dataElement={DataElements.SIGNATURE_LIST_PANEL} className="Panel SignatureListPanel">
+    <DataElementWrapper dataElement={DataElements.SIGNATURE_LIST_PANEL} className={
+      classNames({
+        'Panel': true,
+        'SignatureListPanel': true,
+        'hideAddButton': savedSignatures.length && panelSize === PANEL_SIZES.SMALL_SIZE,
+        [panelSize]: true,
+      })
+    }>
       <div className='signature-list-panel-header'>
         {t('signatureListPanel.header')}
       </div>
@@ -141,9 +181,14 @@ const SignatureListPanel = () => {
         deleteHandler={deleteSignatureAndInitials}
         currentlySelectedSignature={selectedSignatureIndex}
         isDeleteDisabled={isSignatureDeleteButtonDisabled}
-        signatureMode={signatureMode} />
+        signatureMode={signatureMode}
+        panelSize={panelSize} />
     </DataElementWrapper>
   );
+};
+
+SignatureListPanel.propTypes = {
+  panelSize: PropTypes.oneOf(Object.values(PANEL_SIZES)),
 };
 
 export default SignatureListPanel;

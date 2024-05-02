@@ -1,3 +1,5 @@
+@import '../../constants/styles';
+
 .StylePicker {
   display: flex;
   flex-direction: column;
@@ -178,5 +180,10 @@
     }
 
     margin-bottom: 0;
+  }
+
+  @include mobile {
+    padding: 0 16px 16px 16px;
+    overflow: auto;
   }
 }

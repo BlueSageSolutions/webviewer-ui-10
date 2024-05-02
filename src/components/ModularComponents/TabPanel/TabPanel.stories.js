@@ -40,6 +40,10 @@ const initialState = {
         dataElement: 'signaturePanel',
       },
       {
+        render: 'portfolioPanel',
+        dataElement: 'portfolioPanel',
+      },
+      {
         'render': 'tabPanelIconsOnly',
         'dataElement': 'tabPanelIconsOnly',
         'panelsList': [
@@ -57,6 +61,9 @@ const initialState = {
           },
           {
             'render': 'signaturePanel',
+          },
+          {
+            'render': 'portfolioPanel',
           }
         ]
       },
@@ -137,7 +144,10 @@ const initialState = {
   },
   document: {
     bookmarks: [],
-  }
+  },
+  featureFlags: {
+    customizableUI: true,
+  },
 };
 
 const store = configureStore({ reducer: () => initialState });
@@ -145,7 +155,7 @@ const store = configureStore({ reducer: () => initialState });
 
 export const TabPanelWithIconsOnly = () => (
   <Provider store={store}>
-    <div style={{ width: '258px' }}>
+    <div style={{ width: '320px' }}>
       <TabPanel dataElement='tabPanelIconsOnly' />
     </div>
   </Provider>
@@ -211,7 +221,10 @@ const initialStateThumbnailsOnly = {
     totalPages: {
       1: 0,
     }
-  }
+  },
+  featureFlags: {
+    customizableUI: true,
+  },
 };
 
 const storeThumbnailsOnly = configureStore({ reducer: () => initialStateThumbnailsOnly });

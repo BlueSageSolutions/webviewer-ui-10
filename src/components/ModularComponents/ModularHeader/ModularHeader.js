@@ -5,6 +5,8 @@ import { JUSTIFY_CONTENT, PLACEMENT, DEFAULT_GAP } from 'constants/customization
 import ModularHeaderItems from '../../ModularHeaderItems';
 import './ModularHeader.scss';
 import DataElementWrapper from 'src/components/DataElementWrapper';
+import { useSelector } from 'react-redux';
+import selectors from 'selectors';
 
 const ModularHeader = React.forwardRef((props, ref) => {
   const { dataElement,
@@ -17,6 +19,12 @@ const ModularHeader = React.forwardRef((props, ref) => {
     autoHide = true,
     stroke,
   } = props;
+
+  const [
+    isDisabled,
+  ] = useSelector((state) => [
+    selectors.isElementDisabled(state, dataElement),
+  ]);
 
   const [canRemoveItems, setCanRemoveItems] = useState(items.length);
   const key = `${dataElement}-${placement}`;
@@ -36,6 +44,10 @@ const ModularHeader = React.forwardRef((props, ref) => {
   useEffect(() => {
     setCanRemoveItems(!isClosed);
   }, [isClosed]);
+
+  if (isDisabled) {
+    return null;
+  }
 
   return (
     <DataElementWrapper

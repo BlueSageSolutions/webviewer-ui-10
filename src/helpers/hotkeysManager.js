@@ -760,16 +760,15 @@ WebViewer(...)
         const state = getState();
         const isCustomizableUI = state.featureFlags.customizableUI;
         if (isCustomizableUI) {
-          dispatch(actions.setActiveGroupedItemWithTool(ToolNames.SIGNATURE));
           dispatch(actions.openElement(DataElements.SIGNATURE_LIST_PANEL));
           setToolModeAndGroup(store, ToolNames.SIGNATURE);
           return;
         }
         dispatch(actions.setToolbarGroup('toolbarGroup-FillAndSign', false));
-        const sigToolButton = document.querySelector('[data-element="signatureToolGroupButton"] .Button');
-        sigToolButton.click();
-        const sigModalButton = document.querySelector('.signature-row-content');
-        sigModalButton.click();
+        const sigToolButton = getRootNode().querySelector('[data-element="signatureToolGroupButton"] .Button');
+        sigToolButton?.click();
+        const sigModalButton = getRootNode().querySelector('.signature-row-content');
+        sigModalButton?.click();
       }),
       [ShortcutKeys[Shortcuts.SQUIGGLY]]: this.createToolHotkeyHandler(() => {
         if (core.getSelectedText()) {

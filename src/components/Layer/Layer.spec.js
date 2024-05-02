@@ -2,7 +2,6 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
 import Layer from './Layer';
-
 const TestLayer = withProviders(Layer);
 
 describe('Test for Layer', () => {

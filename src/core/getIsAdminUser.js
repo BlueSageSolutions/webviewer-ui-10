@@ -1,6 +1,4 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.AnnotationManager.html#getIsAdminUser__anchor
+ * https://www.pdftron.com/api/web/Core.AnnotationManager.html#getIsAdminUser__anchor
  */
-export default () => core.getDocumentViewer(1).getAnnotationManager().isUserAdmin();
+export default () => window.documentViewer.getAnnotationManager().isUserAdmin();

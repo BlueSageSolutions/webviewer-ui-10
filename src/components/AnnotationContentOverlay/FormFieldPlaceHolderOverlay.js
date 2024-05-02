@@ -2,14 +2,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import core from 'core';
-import DataElements from 'constants/dataElement';
 
 const FormFieldPlaceHolderOverlay = ({ annotation, overlayPosition, overlayRef }) => {
   const [t] = useTranslation();
 
   const formFieldCreationManager = core.getFormFieldCreationManager();
   const formFieldPlaceHolderName = formFieldCreationManager.getFieldName(annotation);
-  const formFieldPlaceHolderType = annotation.getFormFieldPlaceholderType();
+  const formFieldPlaceHolderType = annotation.getFormFieldPlaceHolderType();
 
   const mapPlaceHolderTypeToTranslation = (formFieldPlaceHolderType) => {
     switch (formFieldPlaceHolderType) {
@@ -31,7 +30,7 @@ const FormFieldPlaceHolderOverlay = ({ annotation, overlayPosition, overlayRef }
   return (
     <div
       className="Overlay AnnotationContentOverlay"
-      data-element={DataElements.ANNOTATION_CONTENT_OVERLAY}
+      data-element="annotationContentOverlay"
       style={{ ...overlayPosition }}
       ref={overlayRef}
     >
@@ -44,7 +43,7 @@ const FormFieldPlaceHolderOverlay = ({ annotation, overlayPosition, overlayRef }
         {formFieldPlaceHolderName}
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default FormFieldPlaceHolderOverlay;

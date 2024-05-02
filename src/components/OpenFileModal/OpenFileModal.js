@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import TabManager from 'helpers/TabManager';
 import classNames from 'classnames';
 import getHashParameters from 'helpers/getHashParameters';
+import { Swipeable } from 'react-swipeable';
 import Button from 'components/Button';
 import { useTranslation } from 'react-i18next';
 import { Tabs, Tab, TabPanel } from 'components/Tabs';
@@ -10,13 +11,15 @@ import FileInputPanel from 'components/PageReplacementModal/FileInputPanel';
 import FilePickerPanel from 'components/PageReplacementModal/FilePickerPanel';
 import selectors from 'selectors';
 import actions from 'actions';
-import DataElements from 'constants/dataElement';
-import ModalWrapper from '../ModalWrapper';
 
 import '../PageReplacementModal/PageReplacementModal.scss';
 import './OpenFileModal.scss';
 
 const OpenFileModal = ({ isDisabled, isOpen, tabManager, closeElements }) => {
+  if (isDisabled) {
+    return null;
+  }
+
   const { t } = useTranslation();
 
   const [src, setSrc] = useState('');
@@ -26,7 +29,7 @@ const OpenFileModal = ({ isDisabled, isOpen, tabManager, closeElements }) => {
   const [error, setError] = useState({ 'fileError': '', 'urlError': '', 'extensionError': '' });
 
   const closeModal = () => {
-    closeElements([DataElements.OPEN_FILE_MODAL]);
+    closeElements(['OpenFileModal']);
     setSrc('');
     setError({ 'fileError': '', 'urlError': '' });
     setFilename(null);
@@ -36,13 +39,7 @@ const OpenFileModal = ({ isDisabled, isOpen, tabManager, closeElements }) => {
 
   useEffect(() => {
     if (isOpen) {
-      closeElements([
-        DataElements.PRINT_MODAL,
-        DataElements.LOADING_MODAL,
-        DataElements.PROGRESS_MODAL,
-        DataElements.ERROR_MODAL,
-        DataElements.MODEL3D_MODAL,
-      ]);
+      closeElements(['printModal', 'loadingModal', 'progressModal', 'errorModal', 'Model3DModal']);
     } else {
       setSrc('');
       setError({ 'fileError': '', 'urlError': '' });
@@ -117,19 +114,21 @@ const OpenFileModal = ({ isDisabled, isOpen, tabManager, closeElements }) => {
     return uniqueArr;
   }, []);
 
-  return !isDisabled && (
-    <div className={modalClass} data-element={DataElements.OPEN_FILE_MODAL} onMouseDown={closeModal}>
-      <div className="container" onMouseDown={(e) => e.stopPropagation()}>
-        <ModalWrapper
-          title={t('OpenFile.enterUrlOrChooseFile')}
-          closeButtonDataElement={'openFileModalClose'}
-          onCloseClick={closeModal}
-          swipeToClose
-          closeHandler={closeModal}
-        >
-          <div className="swipe-indicator" />
+  return (
+    <Swipeable onSwipedUp={closeModal} onSwipedDown={closeModal}>
+      <div className={modalClass} data-element="OpenFileModal" onMouseDown={closeModal}>
+        <div className="container" onMouseDown={(e) => e.stopPropagation()}>
           <Tabs className="open-file-modal-tabs" id="openFileModal">
-            <div className="tabs-header-container">
+            <div className="header-container">
+              <div className="header">
+                <p>{t('OpenFile.enterUrlOrChooseFile')}</p>
+                <Button
+                  img={'icon-close'}
+                  onClick={closeModal}
+                  dataElement={'UNKNOWN'}
+                />
+              </div>
+
               <div className="tab-list">
                 <Tab dataElement="urlInputPanelButton">
                   <button className="tab-options-button">
@@ -179,15 +178,15 @@ const OpenFileModal = ({ isDisabled, isOpen, tabManager, closeElements }) => {
               onClick={() => handleAddTab(src, extension, filename, size)}
             />
           </div>
-        </ModalWrapper>
+        </div>
       </div>
-    </div>
+    </Swipeable>
   );
 };
 
 const mapStateToProps = (state) => ({
-  isDisabled: selectors.isElementDisabled(state, DataElements.OPEN_FILE_MODAL),
-  isOpen: selectors.isElementOpen(state, DataElements.OPEN_FILE_MODAL),
+  isDisabled: selectors.isElementDisabled(state, 'OpenFileModal'),
+  isOpen: selectors.isElementOpen(state, 'OpenFileModal'),
   tabManager: selectors.getTabManager(state),
 });
 

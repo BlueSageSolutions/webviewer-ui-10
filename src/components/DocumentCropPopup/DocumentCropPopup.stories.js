@@ -24,44 +24,16 @@ const store = createStore(rootReducer);
 
 const createMockAnnotation = () => {
   return {
-    x: 100,
-    y: 100,
-    width: 100,
-    height: 100,
-    getPageNumber() {
+    getPageNumber: function() {
       return 1;
     },
-    getRect() {
+    getRect: function() {
       return {
         x1: 1,
         x2: 2,
         y1: 3,
         y2: 4,
       };
-    },
-    getX() {
-      return this.x;
-    },
-    getY() {
-      return this.y;
-    },
-    getWidth() {
-      return this.width;
-    },
-    getHeight() {
-      return this.height;
-    },
-    setX(x) {
-      this.x = Number(x);
-    },
-    setY(y) {
-      this.y = Number(y);
-    },
-    setWidth(w) {
-      this.width = Number(w);
-    },
-    setHeight(h) {
-      this.height = Number(h);
     },
   };
 };
@@ -85,7 +57,7 @@ const mockCropDimensions = {
     'xOffset': 0,
     'width': 8,
   }
-};
+}
 
 const noop = () => {};
 
@@ -93,37 +65,33 @@ const popupProps = {
   cropAnnotation: createMockAnnotation(),
   cropMode: 'ALL_PAGES',
   onCropModeChange: noop,
+  getCropDimension: noop,
+  setCropTop: '1',
+  setCropBottom: '1',
+  setCropLeft: '1',
+  setCropRight: '1',
   closeDocumentCropPopup: noop,
   applyCrop: noop,
   isCropping: true,
-  getPageHeight() {
-    return 792;
-  },
-  getPageWidth() {
-    return 612;
-  },
-  isPageRotated() {
-    return false;
-  },
+  getPageHeight: noop,
+  getPageWidth: noop,
   redrawCropAnnotations: noop,
   isInDesktopOnlyMode: false,
   isMobile: false,
-  getPageCount: () => {
-    9;
-  },
-  getCurrentPage: () => {
-    1;
-  },
+  getPageCount: () => {9},
+  getCurrentPage: () => {1},
   selectedPages: [],
   onSelectedPagesChange: noop,
   presetCropDimensions: mockCropDimensions
 };
 
+const popup = <DocumentCropPopup {...popupProps} />;
+
 const inputProps = {
-  yOffset: 1,
-  width: 1,
-  height: 1,
-  xOffset: 1,
+  top: 1,
+  right: 1,
+  bottom: 1,
+  left: 1,
   unit: 'Inches (in)',
   autoTrim: 'Letter',
   supportedUnits: {
@@ -150,11 +118,11 @@ export function Basic() {
 }
 
 export function Dimensions() {
-  return (
+  return(
     <Provider store={store}>
-      <div className="DocumentCropPopup" style={{ maxWidth: '226px' }}>
-        <DimensionsInput {...inputProps} />
-      </div>
-    </Provider>
+    <div className="DocumentCropPopup" style={{maxWidth: '226px'}}>
+      <DimensionsInput {...inputProps} />
+    </div>
+  </Provider>
   );
 }

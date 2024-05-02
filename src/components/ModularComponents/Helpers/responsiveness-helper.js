@@ -75,5 +75,5 @@ export const getSubMenuDOMElement = (currentItem, allItems) => {
     return null;
   }
 
-  return currentItem.children ? <Icon className="icon-open-submenu" glyph="icon-chevron-right" /> : <div className="icon-open-submenu"></div>;
+  return currentItem.children ? <Icon className="icon-open-submenu" glyph="icon-chevron-right" /> : null;
 };

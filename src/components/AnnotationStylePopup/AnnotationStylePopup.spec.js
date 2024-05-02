@@ -7,7 +7,6 @@ import {
   WidgetPlaceHolder as WidgetPlaceHolderStory
 } from './AnnotationStylePopup.stories';
 import getAnnotationStyles from 'helpers/getAnnotationStyles';
-import core from 'core';
 import { mapAnnotationToKey } from 'constants/map';
 
 const AnnotationStylePopupStory = withI18n(BasicStory);
@@ -72,8 +71,8 @@ widgetPlaceHolderAnnot.setCustomData('trn-form-field-type', 'TextFormField');
 
 describe('AnnotationStylePopup component', () => {
   beforeEach(() => {
-    const documentViewer = core.setDocumentViewer(1, new window.Core.DocumentViewer());
-    documentViewer.doc = new window.Core.Document('dummy', 'pdf');
+    window.documentViewer = new window.Core.DocumentViewer();
+    window.documentViewer.doc = new window.Core.Document('dummy', 'pdf');
   });
 
   it('Basic story should not throw any errors', () => {
@@ -96,6 +95,18 @@ describe('AnnotationStylePopup component', () => {
         colorMapKey={mapAnnotationToKey(distanceMeasurementAnnot)}
       />);
     }).not.toThrow();
+  });
+
+  it('Distance story should have extra controls', () => {
+    const { container } = render(<DistanceStory
+      annotations={[distanceMeasurementAnnot]}
+      style={getAnnotationStyles(distanceMeasurementAnnot)}
+      properties={{}}
+      colorMapKey={mapAnnotationToKey(distanceMeasurementAnnot)}
+    />);
+
+    const measurementControls = container.querySelector('.MeasurementOption');
+    expect(measurementControls).toBeInTheDocument();
   });
 
   it('FreeText story should not throw any errors', () => {

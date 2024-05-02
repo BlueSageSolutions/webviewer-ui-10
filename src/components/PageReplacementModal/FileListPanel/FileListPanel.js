@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 import './FileListPanel.scss';
 
 const FileListPanel = ({ defaultValue, onFileSelect, list = [] }) => {
+  const [t] = useTranslation();
   const { id } = defaultValue || {};
 
   const onRowClick = (id) => {
-    onFileSelect(list.find((item) => item.id === id));
+    onFileSelect(list.find(item => item.id === id));
   };
 
   const onRowKeyDown = (event, id) => {
     if (event.key === 'Enter') {
-      onFileSelect(list.find((item) => item.id === id));
+      onFileSelect(list.find(item => item.id === id));
     }
   };
 
@@ -24,12 +26,13 @@ const FileListPanel = ({ defaultValue, onFileSelect, list = [] }) => {
       } else if (thumbnail.toDataURL) {
         src = thumbnail.toDataURL();
       }
-      // If thumbnail doesnt have a url or is canvas then we just show a blank square
-      const img = <img src={src} className="li-div-img" />;
+      //If thumbnail doesnt have a url or is canvas then we just show a blank square
+      const img = <img src={src} className="li-div-img" />
       return (<div className="li-div">{img}</div>);
+    } else {
+      return null;
     }
-    return null;
-  };
+  }
 
   const elements = list.map((item, i) => {
     const isSelected = id === item.id;
@@ -54,6 +57,6 @@ const FileListPanel = ({ defaultValue, onFileSelect, list = [] }) => {
       </ul>
     </div>
   );
-};
+}
 
 export default FileListPanel;

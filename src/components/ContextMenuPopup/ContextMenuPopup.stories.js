@@ -25,11 +25,15 @@ const initialState = {
       { dataElement: 'markReplaceTextToolButton' },
     ],
     customPanels: [],
+    genericPanels: [],
     openElements: {
       contextMenuPopup: true,
     },
     enableRightClickAnnotationPopup: false,
-  }
+  },
+  featureFlags: {
+    customizableUI: true,
+  },
 };
 
 export const BasicHorizontal = () => {

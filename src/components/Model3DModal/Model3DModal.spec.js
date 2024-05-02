@@ -9,6 +9,7 @@ const BasicModel3DModalStory = withI18n(Basic);
 const TestModel3DModal = withProviders(Model3DModal);
 
 
+
 describe('Model3DModal', () => {
   it('Story should not throw any errors', () => {
     expect(() => {
@@ -20,7 +21,7 @@ describe('Model3DModal', () => {
     // render component with isDisabled=true which should cause component to not render anything
     const { container } = render(
       <TestModel3DModal
-        isDisabled
+        isDisabled={true}
       />
     );
     // Verify that .Model3DModal div is not in the document
@@ -30,7 +31,7 @@ describe('Model3DModal', () => {
   it('Should render component if it is opened', () => {
     const { container } = render(
       <BasicModel3DModalStory
-        isOpen
+        isOpen={true}
       />
     );
     // Verify that .Model3DModal div is in the document

@@ -1,5 +1,3 @@
-import getRootNode from 'helpers/getRootNode';
-
 export default () => {
-  getRootNode().querySelector('#file-picker')?.click();
+  document.getElementById('file-picker')?.click();
 };

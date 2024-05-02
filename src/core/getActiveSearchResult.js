@@ -1,8 +1,6 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.DocumentViewer.html#getActiveSearchResult__anchor
+ * https://www.pdftron.com/api/web/Core.DocumentViewer.html#getActiveSearchResult__anchor
  */
-export default function getActiveSearchResult(documentViewerKey = 1) {
-  return core.getDocumentViewer(documentViewerKey).getActiveSearchResult();
+export default function getActiveSearchResult() {
+  return window.documentViewer.getActiveSearchResult();
 }

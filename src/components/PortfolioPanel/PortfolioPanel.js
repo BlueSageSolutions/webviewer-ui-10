@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState } from 'react';
 import { shallowEqual, useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { DndProvider } from 'react-dnd';
@@ -14,25 +14,21 @@ import PortfolioItemContent from 'components/PortfolioItemContent';
 import { PortfolioDragLayer } from './PortfolioDragLayer';
 import DataElementWrapper from 'components/DataElementWrapper';
 import DataElements from 'constants/dataElement';
-import { DropLocation as MoveDirection } from 'constants/dnd';
 import { isMobileDevice } from 'helpers/device';
 import { enableMultiTab } from 'helpers/TabManager';
-import { addFile, deletePortfolioFile, downloadPortfolioFile, getPortfolioFiles, isOpenableFile, renamePortfolioFile, reorderPortfolioFile } from 'helpers/portfolio';
-import core from 'core';
+import { isOpenableFile } from 'helpers/portfolioUtils';
 
 import '../../constants/bookmarksOutlinesShared.scss';
 import './PortfolioPanel.scss';
 
-const PortfolioPanel = () => {
+const PortfolioPanel = ({ portfolioFiles }) => {
   const [
     isDisabled,
     tabManager,
-    portfolioFiles,
   ] = useSelector(
     (state) => [
       selectors.isElementDisabled(state, DataElements.PORTFOLIO_PANEL),
       selectors.getTabManager(state),
-      selectors.getPortfolio(state),
     ],
     shallowEqual,
   );
@@ -43,39 +39,7 @@ const PortfolioPanel = () => {
   const [activePortfolioItem, setActivePortfolioItem] = useState(null);
   const [isAddingNewFolder, setAddingNewFolder] = useState(false);
 
-  const fileInputRef = useRef(null);
-
-  const onAddFile = () => {
-    fileInputRef?.current?.click();
-  };
-
-  const addNewFile = async (e) => {
-    const files = e.target.files;
-    if (files.length === 1) {
-      const file = files[0];
-      const isNameConflicted = portfolioFiles.some((item) => item.name === file.name);
-      if (isNameConflicted) {
-        const message = t('portfolio.fileAlreadyExistsMessage', { fileName: file.name });
-        const title = t('portfolio.fileAlreadyExists');
-        const confirmBtnText = t('portfolio.reselect');
-        const warning = {
-          message,
-          title,
-          confirmBtnText,
-          onConfirm: () => onAddFile()
-        };
-        dispatch(actions.showWarningMessage(warning));
-      } else {
-        const doc = core.getDocument();
-        if (doc) {
-          const pdfDoc = await doc.getPDFDoc();
-          if (pdfDoc) {
-            await addFile(pdfDoc, file);
-            refreshPortfolio();
-          }
-        }
-      }
-    }
+  const addNewFile = () => {
   };
 
   const addNewFolder = (name) => {
@@ -86,93 +50,52 @@ const PortfolioPanel = () => {
     refreshPortfolio();
   };
 
-  const renamePortfolioItem = async (id, newName) => {
-    await renamePortfolioFile(id, newName);
+  const renamePortfolioItem = () => {
+    // TODO: rename file or folder here
     refreshPortfolio();
   };
 
-  const refreshPortfolio = async () => {
-    dispatch(actions.setPortfolio(await getPortfolioFiles()));
+  const refreshPortfolio = () => {
     setAddingNewFolder(false);
   };
 
-  const removePortfolioItem = (id) => {
-    const fileToRemove = portfolioFiles.find((file) => file.id === id);
-    const message = t('portfolio.deletePortfolio', { fileName: fileToRemove.name });
-    const title = t('action.delete');
-    const confirmBtnText = t('action.delete');
-    const warning = {
-      message,
-      title,
-      confirmBtnText,
-      onConfirm: async () => {
-        await deletePortfolioFile(id);
-        refreshPortfolio();
-      },
-    };
-    dispatch(actions.showWarningMessage(warning));
+  const removePortfolioItem = (name) => {
+    /* eslint-disable no-console */
+    console.log('removePortfolio', name);
+    // TODO: remove file or folder here
+    refreshPortfolio();
   };
 
   const openPortfolioItem = (portfolioItem) => {
-    if (isOpenableFile(portfolioItem.extension)) {
+    if (isOpenableFile(portfolioItem)) {
       dispatch(enableMultiTab());
       dispatch(actions.addPortfolioTab(portfolioItem));
     }
   };
 
-  const isNameDuplicated = (newName, id) => {
+  const isNameDuplicated = (name, id) => {
     const otherFiles = portfolioFiles.filter((file) => file.id !== id);
-    return otherFiles.some((file) => file.name === newName);
+    return otherFiles.some((file) => file.name === name);
   };
 
-  const downloadPortfolioItem = async (portfolioItem) => {
-    dispatch(actions.openElement(DataElements.LOADING_MODAL));
-    await downloadPortfolioFile(portfolioItem);
-    dispatch(actions.closeElement(DataElements.LOADING_MODAL));
+  const movePortfolioInward = (dragPortfolioItem, dropPortfolioItem) => {
+    console.log(dragPortfolioItem.name, 'movePortfolioInward', dropPortfolioItem.name);
   };
 
-  const movePortfolioInward = (dragItem, dropItem) => {
-    /* eslint-disable no-console */
-    // no-console function is empty for now
-    console.log(dragItem.name, 'Inward', dropItem.name);
+  const movePortfolioBeforeTarget = (dragPortfolioItem, dropPortfolioItem) => {
+    console.log(dragPortfolioItem.name, 'movePortfolioBeforeTarget', dropPortfolioItem.name);
+  };
+
+  const movePortfolioAfterTarget = (dragPortfolioItem, dropPortfolioItem) => {
+    console.log(dragPortfolioItem.name, 'movePortfolioAfterTarget', dropPortfolioItem.name);
     /* eslint-enable no-console */
   };
 
-  const moveFileInArray = async (portfolioFiles, dragItemId, dropItemId, moveDirection) => {
-    // clone to another array to avoid modifying portfolioFiles
-    const fileArray = [...portfolioFiles];
-    const fromIndex = fileArray.findIndex((file) => file.id === dragItemId);
-    const dropItemIndex = fileArray.findIndex((file) => file.id === dropItemId);
-    let moveToIndex = dropItemIndex;
-    // If move 1 to before 3, we want to delete 1 and re-insert at index (3-1=2)
-    if (moveDirection === MoveDirection.ABOVE_TARGET && fromIndex < dropItemIndex) {
-      moveToIndex = dropItemIndex - 1;
-    }
-    // If move 3 to after 1, we want to delete 3 and re-insert at index (1+1=2)
-    if (moveDirection === MoveDirection.BELOW_TARGET && fromIndex > dropItemIndex) {
-      moveToIndex = dropItemIndex + 1;
-    }
+  if (isDisabled) {
+    return null;
+  }
 
-    // Move elements in an array based on index
-    fileArray.splice(moveToIndex, 0, fileArray.splice(fromIndex, 1)[0]);
-    for (const [index, file] of fileArray.entries()) {
-      if (file.order !== index) {
-        await reorderPortfolioFile(file.id, index);
-      }
-    }
-  };
-
-  const movePortfolioBeforeTarget = useCallback(async (dragItemId, dropItemId) => {
-    await moveFileInArray(portfolioFiles, dragItemId, dropItemId, MoveDirection.ABOVE_TARGET);
-    refreshPortfolio();
-  }, [portfolioFiles]);
-
-  const movePortfolioAfterTarget = useCallback(async (dragItemId, dropItemId) => {
-    await moveFileInArray(portfolioFiles, dragItemId, dropItemId, MoveDirection.BELOW_TARGET);
-    refreshPortfolio();
-  }, [portfolioFiles]);
-
-  return isDisabled ? null : (
+  return (
     <DataElementWrapper
       className="Panel PortfolioPanel bookmark-outline-panel"
       dataElement={DataElements.PORTFOLIO_PANEL}
@@ -189,17 +112,7 @@ const PortfolioPanel = () => {
             img="icon-add-file"
             title={t('portfolio.addFile')}
             disabled={isAddingNewFolder}
-            onClick={onAddFile}
-          />
-
-          <input
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            type="file"
-            onChange={(event) => {
-              addNewFile(event);
-              event.target.value = null;
-            }}
+            onClick={addNewFile}
           />
         </div>
       </div>
@@ -215,7 +128,6 @@ const PortfolioPanel = () => {
           renamePortfolioItem,
           removePortfolioItem,
           openPortfolioItem,
-          downloadPortfolioItem,
           refreshPortfolio,
           isNameDuplicated,
           tabManager,

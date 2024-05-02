@@ -86,6 +86,13 @@
       padding: 0;
     }
 
+    .PortfolioPanel {
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1;
+      flex-direction: column;
+    }
+
     .thumbnail-slider-container {
       width: 100%;
     }

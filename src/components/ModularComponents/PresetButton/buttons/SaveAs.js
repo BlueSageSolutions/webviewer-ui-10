@@ -37,6 +37,9 @@ const SaveAsButton = (props) => {
   const isDisabled = documentType === workerTypes.XOD;
 
   if (isDisabled) {
+    if (isFlyoutItem) {
+      return null;
+    }
     console.warn('The save as preset button is not available for XOD documents.');
   }
 

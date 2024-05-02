@@ -1,8 +1,4 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.AnnotationManager.html#getGroupAnnotations__anchor
+ * https://www.pdftron.com/api/web/Core.AnnotationManager.html#getGroupAnnotations__anchor
  */
-export default (annotation, documentViewerKey = 1) => {
-  return core.getDocumentViewer(documentViewerKey).getAnnotationManager().getGroupAnnotations(annotation);
-};
+export default (annotation) => window.documentViewer.getAnnotationManager().getGroupAnnotations(annotation);

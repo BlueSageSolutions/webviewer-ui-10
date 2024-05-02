@@ -190,8 +190,8 @@ export const setActiveToolNameAndStyle = (toolObject) => (dispatch, getState) =>
   } else {
     // on desktop, auto switch between AnnotationEdit and TextSelect is true when you hover on text
     // we do this to prevent this action from spamming the console
-    name =
-      toolObject.name === 'TextSelect' || toolObject.name === 'OfficeEditorTextSelect' ? 'AnnotationEdit' : toolObject.name;
+    const toolsName = window.Core.Tools.ToolNames;
+    name = toolObject.name === toolsName['TEXT_SELECT'] || toolObject.name === toolsName['OFFICE_EDITOR_CONTENT_SELECT'] ? toolsName['EDIT'] : toolObject.name;
   }
 
   if (state.viewer.activeToolName === name) {
@@ -237,13 +237,6 @@ export const setActiveCustomPanel = (tabPanel, wrapperPanel) => (dispath, getSta
   dispath({
     type: 'SET_ACTIVE_CUSTOM_PANEL',
     payload: { wrapperPanel, tabPanel },
-  });
-};
-
-export const setLastPickedToolForGroupedItems = (groupedItem, toolName) => (dispatch) => {
-  dispatch({
-    type: 'SET_LAST_PICKED_TOOL_FOR_GROUPED_ITEMS',
-    payload: { groupedItem, toolName },
   });
 };
 
@@ -450,8 +443,10 @@ export const setFlyoutPosition = (newPosition) => ({
   payload: { newPosition },
 });
 export const addFlyout = (newFlyout) => (dispatch, getState) => {
+  const flyoutsToUpdateInstead = [DataElements.MAIN_MENU];
   const flyoutMap = selectors.getFlyoutMap(getState());
-  while (flyoutMap[newFlyout.dataElement]) {
+  const shouldUpdateInstead = flyoutsToUpdateInstead.includes(newFlyout.dataElement);
+  while (flyoutMap[newFlyout.dataElement] && !shouldUpdateInstead) {
     const oldDataElement = newFlyout.dataElement;
     if (newFlyout.dataElement.match(/[0-9]$/)) {
       const number = parseInt(newFlyout.dataElement.match(/\d+$/)[0], 10);
@@ -773,6 +768,11 @@ export const setIsMultiViewerModeAvailable = (isMultiViewerModeAvailable) => ({
 export const setIsOfficeEditorMode = (isOfficeEditorMode) => ({
   type: 'SET_IS_OFFICE_EDITOR_MODE',
   payload: { isOfficeEditorMode }
+});
+
+export const setOfficeEditorEditMode = (editMode) => ({
+  type: 'SET_OFFICE_EDITOR_EDIT_MODE',
+  payload: { editMode }
 });
 
 export const growCustomElement = (dataElement) => (dispatch, getState) => {

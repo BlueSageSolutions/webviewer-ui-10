@@ -26,7 +26,7 @@ class PresetButton extends Item {
     super(props);
     this.type = ITEM_TYPE.PRESET_BUTTON;
     this.buttonType = props.buttonType;
-    this.dataElement = props.dataElement || this.buttonType;
+    this._dataElement = props.dataElement || this.buttonType;
   }
 }
 

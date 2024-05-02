@@ -13,8 +13,11 @@ import actions from 'actions';
     instance.UI.enableClearSearchOnPanelClose();
   });
  */
-const enableClearSearchOnPanelCloseClosure = (store) => () => {
-  store.dispatch(actions.setClearSearchOnPanelClose(true));
-};
+function enableClearSearchOnPanelCloseClosure(store) {
+  return function enableClearSearchOnPanelClose() {
+    const shouldClear = true;
+    store.dispatch(actions.setClearSearchOnPanelClose(shouldClear));
+  };
+}
 
 export default enableClearSearchOnPanelCloseClosure;

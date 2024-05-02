@@ -1,58 +1,80 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getAnnotationPosition } from 'helpers/getPopupPosition';
+import core from 'core';
 
 import './FormFieldIndicator.scss';
 
-const INDICATOR_HEIGHT = 40;
-const INDICATOR_WIDTH = 100;
-const INDICATOR_PADDING = 20;
+const FormFieldIndicator = ({ annotation }) => {
+  const INDICATOR_HEIGHT = 40;
+  const INDICATOR_WIDTH = 100;
+  const INDICATOR_PADDING = 20;
 
-const FormFieldIndicator = ({ annotation, parameters }) => {
-  const { displayMode, viewerBoundingRect, appBoundingRect, scrollLeft, scrollTop } = parameters;
+  const [xOffset, setXOffset] = useState(0);
+  const [yOffset, setYOffset] = useState(0);
+  const [showIndicator, setShowIndicator] = useState(0);
+  const [indicatorText, setIndicatorText] = useState('');
+  const [isPlaceholder, setIsPlaceholder] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(false);
+  const [isRightSidePage, setIsRightSidePage] = useState(false);
 
   const setIndicatorYPosition = (annotation) => {
-    try {
-      const { bottomRight: annotationBottomRight, topLeft: annotationTopLeft } = getAnnotationPosition(annotation);
-      const annotHeightInPixels = annotationBottomRight.y - annotationTopLeft.y;
-      return annotationTopLeft.y + annotHeightInPixels / 2 - INDICATOR_HEIGHT / 2 - scrollTop;
-    } catch (e) {
-      return 0;
-    }
+    const { scrollTop } = core.getScrollViewElement();
+    const { bottomRight: annotationBottomRight, topLeft: annotationTopLeft } = getAnnotationPosition(annotation);
+    const annotHeightInPixels = annotationBottomRight.y - annotationTopLeft.y;
+
+    return annotationTopLeft.y + annotHeightInPixels / 2 - INDICATOR_HEIGHT / 2 - scrollTop;
   };
 
-  let visiblePages = [];
-  try {
-    visiblePages = displayMode.getVisiblePages();
-  } catch (e) { }
+  const moveIndicatorToRightSide = (offset) => {
+    setIsRightSidePage(true);
+    const rightPosition = core.getViewerElement().getBoundingClientRect().right + INDICATOR_PADDING + offset;
+    setXOffset(rightPosition);
+  };
 
-  const origin = appBoundingRect.left;
-  const leftPosition = viewerBoundingRect.left
-  - INDICATOR_WIDTH - INDICATOR_PADDING + scrollLeft;
-
-  let xOffset = leftPosition - origin;
-  const yOffset = setIndicatorYPosition(annotation);
-  let isRightSidePage = false;
-
-  switch (displayMode.mode) {
-    case 'Facing':
-    case 'FacingContinuous':
-      if (annotation.PageNumber % 2 === 0) {
-        isRightSidePage = true;
-        xOffset = viewerBoundingRect.right + INDICATOR_PADDING + scrollLeft;
-      }
-      break;
-    case 'CoverFacing':
-    case 'Cover':
-      if (annotation.PageNumber % 2 !== 0) {
-        isRightSidePage = true;
-        xOffset = viewerBoundingRect.right + INDICATOR_PADDING + scrollLeft;
-      }
-      break;
+  if (!core.getDocument()) {
+    return null;
   }
 
-  const isPlaceholder = annotation.isFormFieldPlaceholder();
-  const isPageVisible = visiblePages.includes(annotation.PageNumber);
-  const indicatorText = annotation.getCustomData('trn-form-field-indicator-text');
+  useEffect(() => {
+    const documentViewer = core.getDocumentViewer();
+    const displayMode = documentViewer.getDisplayModeManager().getDisplayMode();
+    const visiblePages = displayMode.getVisiblePages();
+    const { scrollLeft } = core.getScrollViewElement();
+
+    const leftPosition =
+      core.getViewerElement().getBoundingClientRect().left - INDICATOR_WIDTH - INDICATOR_PADDING + scrollLeft;
+    setXOffset(leftPosition);
+
+    switch (displayMode.mode) {
+      case 'Facing':
+      case 'FacingContinuous':
+        if (annotation.PageNumber % 2 === 0) {
+          moveIndicatorToRightSide(scrollLeft);
+        }
+        break;
+      case 'CoverFacing':
+      case 'Cover':
+        if (annotation.PageNumber % 2 !== 0) {
+          moveIndicatorToRightSide(scrollLeft);
+        }
+        break;
+    }
+
+    const yPosition = setIndicatorYPosition(annotation);
+    setYOffset(yPosition);
+
+    setShowIndicator(annotation.getCustomData('trn-form-field-show-indicator') === 'true');
+
+    setIndicatorText(annotation.getCustomData('trn-form-field-indicator-text'));
+
+    setIsPlaceholder(annotation.isFormFieldPlaceholder());
+
+    setIsPageVisible(visiblePages.includes(annotation.PageNumber));
+  }, [annotation]);
+
+  if (!showIndicator) {
+    return null;
+  }
 
   return (
     <div

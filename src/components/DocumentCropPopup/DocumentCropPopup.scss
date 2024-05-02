@@ -280,7 +280,6 @@
   box-shadow: 0 0 3px 0 var(--document-box-shadow);
   background: var(--component-background);
   top: 0;
-  z-index: max($modal-z-index, $popup-z-index);
 
   @include mobile {
     width: 100%;
@@ -330,12 +329,12 @@
 
       .Dropdown__items {
         top: -52px;
-        z-index: max($modal-z-index, $popup-z-index);
+        z-index: 80;
         width: 100%;
       }
 
       .wrapper {
-        z-index: max($modal-z-index, $popup-z-index) - 1;
+        z-index: 79;
       }
     
       .save-button {

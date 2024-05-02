@@ -23,8 +23,6 @@ const reducer = () => {
 
 const portfolioItem = {
   name: 'A test file.pdf',
-  nameWithoutExtension: 'A test file',
-  extension: 'pdf',
   id: '0',
 };
 
@@ -44,8 +42,8 @@ const PortfolioContextValues = {
   addNewFolder: NOOP,
   setAddingNewFolder: NOOP,
   refreshPortfolio: NOOP,
-  renamePortfolioItem: NOOP,
-  removePortfolioItem: NOOP,
+  renamePortfolio: NOOP,
+  removePortfolio: NOOP,
   isNameDuplicated: NOOP,
 };
 
@@ -123,7 +121,7 @@ export const Renaming = () => {
               value={PortfolioContextValues}
             >
               <PortfolioItemContent
-                portfolioItem={portfolioItem}
+                portfolioItem={portfolioItemFolder}
                 isPortfolioRenaming={true}
                 setPortfolioRenaming={NOOP}
                 setIsHovered={NOOP}

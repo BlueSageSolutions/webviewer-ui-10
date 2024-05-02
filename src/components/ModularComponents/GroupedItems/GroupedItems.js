@@ -94,7 +94,7 @@ const GroupedItems = (props) => {
     }
 
     dispatch(actions.updateFlyout(flyoutDataElement, flyout));
-  }, [size]);
+  }, [size, validItems.length]);
 
   useEffect(() => {
     setItemsGap(gap);

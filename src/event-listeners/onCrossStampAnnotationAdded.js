@@ -4,9 +4,9 @@ import actions from 'actions';
 
 const { ToolNames } = window.Core.Tools;
 
-export default (dispatch, documentViewerKey) => (crossStampAnnotation) => {
+export default dispatch => crossStampAnnotation => {
   core.setToolMode(defaultTool);
-  core.getToolsFromAllDocumentViewers(ToolNames.FORM_FILL_CROSS).forEach((tool) => tool.hidePreview());
+  core.getTool(ToolNames.FORM_FILL_CROSS).hidePreview();
   dispatch(actions.setActiveToolGroup(''));
-  core.selectAnnotation(crossStampAnnotation, documentViewerKey);
+  core.selectAnnotation(crossStampAnnotation);
 };

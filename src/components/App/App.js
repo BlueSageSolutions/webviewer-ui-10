@@ -36,7 +36,6 @@ import TopHeader from 'components/ModularComponents/TopHeader';
 import FlyoutContainer from 'components/ModularComponents/FlyoutContainer';
 import RibbonOverflowFlyout from 'components/ModularComponents/RibbonOverflowFlyout';
 import ViewControlsFlyout from 'components/ModularComponents/ViewControls/ViewControlsFlyout';
-import MainMenu from 'components/ModularComponents/MainMenu/MainMenuFlyout';
 import ProgressModal from 'components/ProgressModal';
 import LazyLoadWrapper, { LazyLoadComponents } from 'components/LazyLoadWrapper';
 import useOnTextSelected from 'hooks/useOnTextSelected';
@@ -68,12 +67,14 @@ import DataElements from 'constants/dataElement';
 import { defaultPanels } from '../../redux/modularComponents';
 
 import setLanguage from 'src/apis/setLanguage';
-
+import { loadDefaultFonts } from 'src/helpers/loadFont';
 import './App.scss';
 import LayersPanel from 'components/LayersPanel';
 import MultiViewerWrapper from 'components/MultiViewer/MultiViewerWrapper';
 import FeatureFlags from 'constants/featureFlags';
 import { PRIORITY_ONE } from 'constants/actionPriority';
+import TabsHeader from 'components/TabsHeader';
+import useTabFocus from 'hooks/useTabFocus';
 
 // TODO: Use constants
 const tabletBreakpoint = window.matchMedia('(min-width: 641px) and (max-width: 900px)');
@@ -95,6 +96,7 @@ const App = ({ removeEventHandlers }) => {
     notesInLeftPanel,
     isOfficeEditorMode,
     featureFlags,
+    isAccessibileMode,
   ] = useSelector((state) => [
     selectors.isInDesktopOnlyMode(state),
     selectors.isMultiViewerMode(state),
@@ -103,6 +105,7 @@ const App = ({ removeEventHandlers }) => {
     selectors.getNotesInLeftPanel(state),
     selectors.getIsOfficeEditorMode(state),
     selectors.getFeatureFlags(state),
+    selectors.isAccessibleMode(state),
   ], shallowEqual);
 
   const { customizableUI } = featureFlags;
@@ -110,6 +113,9 @@ const App = ({ removeEventHandlers }) => {
   // of the redaction hook it creates a reference that tracks the redaction annotations
   useOnAnnotationCreateRubberStampToolMode();
   useOnAnnotationCreateSignatureToolMode();
+  if (isAccessibileMode) {
+    useTabFocus();
+  }
   const { redactionAnnotationsList } = useOnRedactionAnnotationChanged();
 
   useEffect(() => {
@@ -122,6 +128,7 @@ const App = ({ removeEventHandlers }) => {
   }, []);
 
   useEffect(() => {
+    loadDefaultFonts();
     const isCustomizableUIEnabled = getHashParameters('ui', 'default') === 'beta';
     const isOfficeEditingEnabled = getHashParameters('enableOfficeEditing', false);
     if (isCustomizableUIEnabled && !isOfficeEditingEnabled) {
@@ -331,6 +338,8 @@ const App = ({ removeEventHandlers }) => {
         return <LazyLoadWrapper Component={LazyLoadComponents.SignatureListPanel} dataElement={dataElement} />;
       case panelNames.RUBBER_STAMP:
         return <LazyLoadWrapper Component={LazyLoadComponents.RubberStampPanel} dataElement={dataElement} />;
+      case panelNames.PORTFOLIO:
+        return <LazyLoadWrapper Component={LazyLoadComponents.PortfolioPanel} dataElement={dataElement} />;
     }
   };
 
@@ -364,7 +373,6 @@ const App = ({ removeEventHandlers }) => {
         <FlyoutContainer />
         <RibbonOverflowFlyout />
         <ViewControlsFlyout />
-        <MainMenu />
         <Accessibility />
         <Header />
         {isOfficeEditorMode && (
@@ -373,6 +381,7 @@ const App = ({ removeEventHandlers }) => {
             dataElement={DataElements.OFFICE_EDITOR_TOOLS_HEADER}
           />
         )}
+        {customizableUI && <TabsHeader/>}
         <TopHeader />
         <div className="content">
           <LeftHeader />

@@ -3,6 +3,7 @@ import RedactionSearchPanel from './RedactionSearchPanel';
 import useOnRedactionSearchCompleted from 'hooks/useOnRedactionSearchCompleted';
 
 const ReactionSearchPanelContainer = () => {
+
   const {
     redactionSearchResults,
     isProcessingRedactionResults,
@@ -20,4 +21,4 @@ const ReactionSearchPanelContainer = () => {
   );
 };
 
-export default ReactionSearchPanelContainer;
+export default ReactionSearchPanelContainer

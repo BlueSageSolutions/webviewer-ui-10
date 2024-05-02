@@ -1,23 +1,27 @@
 import React from 'react';
 import RibbonsComponent from './Ribbons';
-import { Provider } from 'react-redux';
+import { Provider } from "react-redux";
+import { combineReducers, createStore } from 'redux';
 import initialState from 'src/redux/initialState';
-import { configureStore } from '@reduxjs/toolkit';
+import viewerReducer from 'src/redux/reducers/viewerReducer';
 
-const store = configureStore({
-  reducer: () => initialState
+const reducer = combineReducers({
+  viewer: viewerReducer(initialState.viewer)
 });
+
+const store = createStore(reducer);
 
 export default {
   title: 'Components/Ribbons',
   component: RibbonsComponent,
-};
+}
 
 const BasicComponent = (props) => {
   const { containerWidth } = props;
+  console.log({ containerWidth });
   return (
     <Provider store={store}>
-      <div className="custom-ribbons-container" style={{ width: containerWidth }}>
+      <div className='custom-ribbons-container' style={{ width: containerWidth }}>
         <RibbonsComponent {...props} />
       </div>
     </Provider>

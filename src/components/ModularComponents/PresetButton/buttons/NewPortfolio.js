@@ -23,6 +23,9 @@ const NewPortfolioButton = (props) => {
   const isCreatePortfolioButtonEnabled = !useSelector((state) => selectors.isElementDisabled(state, DataElements.CREATE_PORTFOLIO_BUTTON)) && core.isFullPDFEnabled();
 
   if (!isCreatePortfolioButtonEnabled) {
+    if (isFlyoutItem) {
+      return null;
+    }
     console.warn('The create portfolio preset button is not available for non-full PDF mode.');
   }
 

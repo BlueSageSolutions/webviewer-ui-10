@@ -134,13 +134,15 @@ export const CustomBasic = () => {
       currentPage: 3,
       lastPickedToolForGroupedItems: {
         'annotateGroupedItems': 'AnnotationCreateTextHighlight',
+        'annotateToolsGroupedItems': 'AnnotationCreateTextHighlight',
       },
       activeGroupedItems: ['annotateGroupedItems'],
       activeCustomRibbon: 'toolbarGroup-Annotate',
       lastPickedToolAndGroup: {
         tool: 'AnnotationCreateTextHighlight',
-        group: ['annotateGroupedItems'],
+        group: ['annotateGroupedItems', 'annotateToolsGroupedItems'],
       },
+      activeToolName: 'AnnotationCreateTextHighlight',
     },
     document: {
       ...initialState.document,
@@ -281,6 +283,7 @@ export const CustomRightSideNoBookmarks = () => {
       pageLabels: pageLabels,
       currentPage: 3,
       activeCustomRibbon: 'toolbarGroup-View',
+      activeToolName: 'AnnotationCreateTextHighlight'
     },
     document: {
       ...initialState.document,

@@ -1,6 +1,4 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.DocumentViewer.html#getCurrentPage__anchor
+ * https://www.pdftron.com/api/web/Core.DocumentViewer.html#getCurrentPage__anchor
  */
-export default (documentViewerKey = 1) => core.getDocumentViewer(documentViewerKey).getCurrentPage();
+export default () => window.documentViewer.getCurrentPage();

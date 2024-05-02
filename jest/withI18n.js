@@ -1,9 +1,9 @@
 import React from 'react';
 import i18next from 'i18next';
 import { I18nextProvider, initReactI18next } from "react-i18next";
-import getAvailableLanguages from '../src/apis/getAvailableLanguages';
+import { availableLanguages } from '../src/apis/getAvailableLanguages';
 
-i18next.languages = getAvailableLanguages();
+i18next.languages = availableLanguages;
 
 const resources = i18next.languages.reduce((accumulator, language,) => {
   const translation = require(`../i18n/translation-${language}.json`);

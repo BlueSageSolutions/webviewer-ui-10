@@ -50,6 +50,7 @@ const InitialMenuOverLayItem = ({ dataElement, children }) => {
   });
 };
 
+
 function MenuOverlay() {
   const dispatch = useDispatch();
   const [t] = useTranslation();
@@ -61,7 +62,6 @@ function MenuOverlay() {
   const sortStrategy = useSelector(selectors.getSortStrategy);
   const isFullScreen = useSelector((state) => selectors.isFullScreen(state));
   const timezone = useSelector((state) => selectors.getTimezone(state));
-  const isCreatePortfolioButtonEnabled = !useSelector((state) => selectors.isElementDisabled(state, DataElements.CREATE_PORTFOLIO_BUTTON)) && core.isFullPDFEnabled();
 
   const closeMenuOverlay = useCallback(() => dispatch(actions.closeElements([DataElements.MENU_OVERLAY])), [dispatch]);
 
@@ -116,8 +116,19 @@ function MenuOverlay() {
       ariaLabel={t('component.menuOverlay')}
     >
       <InitialMenuOverLayItem>
+        {isOfficeEditorMode() && (
+          <ActionButton
+            dataElement="newDocumentButton"
+            className="row"
+            img="icon-plus-sign"
+            label={t('action.newDocument')}
+            ariaLabel={t('action.newDocument')}
+            role="option"
+            onClick={handleNewDocumentClick}
+          />
+        )}
         <ActionButton
-          dataElement={DataElements.FILE_PICKER_BUTTON}
+          dataElement="filePickerButton"
           className="row"
           img="icon-header-file-picker-line"
           label={t('action.openFile')}
@@ -127,7 +138,7 @@ function MenuOverlay() {
         />
         {documentType !== workerTypes.XOD && !isOfficeEditorMode() && (
           <ActionButton
-            dataElement={DataElements.DOWNLOAD_BUTTON}
+            dataElement="downloadButton"
             className="row"
             img="icon-download"
             label={t('action.download')}
@@ -138,7 +149,7 @@ function MenuOverlay() {
         )}
         {isOfficeEditorMode() && (
           <ActionButton
-            dataElement={DataElements.FULLSCREEN_BUTTON}
+            dataElement="fullscreenButton"
             className="row"
             img={isFullScreen ? 'icon-header-full-screen-exit' : 'icon-header-full-screen'}
             label={isFullScreen ? t('action.exitFullscreen') : t('action.enterFullscreen')}
@@ -147,8 +158,19 @@ function MenuOverlay() {
             onClick={toggleFullscreen}
           />
         )}
+        {documentType !== workerTypes.XOD && (
+          <ActionButton
+            dataElement="saveAsButton"
+            className="row"
+            img="icon-save"
+            label={t('saveModal.saveAs')}
+            ariaLabel={t('saveModal.saveAs')}
+            role="option"
+            onClick={openSaveModal}
+          />
+        )}
         <ActionButton
-          dataElement={DataElements.PRINT_BUTTON}
+          dataElement="printButton"
           className="row"
           img="icon-header-print-line"
           label={t('action.print')}
@@ -158,8 +180,22 @@ function MenuOverlay() {
         />
       </InitialMenuOverLayItem>
       <div className="divider"></div>
+      {false && core.isFullPDFEnabled() && (
+        <>
+          <ActionButton
+            dataElement="portfolioButton"
+            className="row"
+            img="icon-pdf-portfolio"
+            label={t('portfolio.createPDFPortfolio')}
+            ariaLabel={t('portfolio.createPDFPortfolio')}
+            role="option"
+            onClick={handlePortfolioButtonClick}
+          />
+          <div className="divider"></div>
+        </>
+      )}
       <ActionButton
-        dataElement={DataElements.SETTINGS_BUTTON}
+        dataElement="settingsButton"
         className="row"
         img="icon-header-settings-line"
         label={t('option.settings.settings')}

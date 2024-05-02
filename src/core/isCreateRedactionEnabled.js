@@ -1,7 +1,5 @@
-import core from 'core';
-
 /**
- * https://docs.apryse.com/api/web/Core.AnnotationManager.html#isCreateRedactionEnabled__anchor
- * @see https://docs.apryse.com/api/web/Core.AnnotationManager.html#isCreateRedactionEnabled__anchor
+ * https://www.pdftron.com/api/web/Core.AnnotationManager.html#isCreateRedactionEnabled__anchor
+ * @see https://www.pdftron.com/api/web/Core.AnnotationManager.html#event:isCreateRedactionEnabled__anchor
  */
-export default (documentViewerKey = 1) => core.getDocumentViewer(documentViewerKey).getAnnotationManager().isCreateRedactionEnabled();
+export default () => window.documentViewer.getAnnotationManager().isCreateRedactionEnabled();

@@ -60,7 +60,7 @@ const ModularHeaderItems = (props) => {
     }
 
     dispatch(actions.updateFlyout(flyoutDataElement, flyout));
-  }, [size]);
+  }, [size, items.length]);
 
   const headerDirection = [PLACEMENT.LEFT, PLACEMENT.RIGHT].includes(placement) ? DIRECTION.COLUMN : DIRECTION.ROW;
 

@@ -31,7 +31,7 @@ const MAX_COLUMNS = 16;
 
 const hoverAreaHeight = 25;
 
-const ThumbnailsPanel = ({ panelSelector, parentDataElement }) => {
+const ThumbnailsPanel = ({ panelSelector }) => {
   const [
     isLeftPanelOpen,
     isDisabled,
@@ -408,9 +408,7 @@ const ThumbnailsPanel = ({ panelSelector, parentDataElement }) => {
         const draggingSelectedPage = selectedPageIndexes.some((i) => i === currentPageIndex);
         const pageNumbersToMove = draggingSelectedPage ? selectedPageIndexes.map((i) => i + 1) : [currentPage];
         afterMovePageNumber.current = targetPageNumber - pageNumbersToMove.filter((p) => p < targetPageNumber).length;
-        core.movePages(pageNumbersToMove, targetPageNumber).then(() => {
-          fireEvent(Events.BSS_PAGE_REORDERED, { pageNumbersToMove, targetPageNumber });
-        });
+        core.movePages(pageNumbersToMove, targetPageNumber);
         const updatedPagesNumbers = [];
         for (let offset = 0; offset < pageNumbersToMove.length; offset++) {
           updatedPagesNumbers.push(afterMovePageNumber.current + offset);
@@ -624,7 +622,7 @@ const ThumbnailsPanel = ({ panelSelector, parentDataElement }) => {
           </div>
         )}
       </Measure>
-      <DocumentControls shouldShowControls={shouldShowControls} parentElement={parentDataElement || panelSelector}/>
+      <DocumentControls shouldShowControls={shouldShowControls} parentElement={panelSelector}/>
     </React.Fragment>
   );
 };

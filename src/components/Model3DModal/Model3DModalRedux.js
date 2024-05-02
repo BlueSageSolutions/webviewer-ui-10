@@ -4,7 +4,6 @@ import actions from 'actions';
 import core from 'core';
 import { useDispatch, useSelector } from 'react-redux';
 import Model3DModalContainer from './Model3DModalContainer';
-import DataElements from 'constants/dataElement';
 
 function Model3DModalRedux(props) {
   const dispatch = useDispatch();
@@ -15,13 +14,24 @@ function Model3DModalRedux(props) {
   const urlInput = React.createRef();
 
 
-  const [isDisabled, isOpen] = useSelector((state) => [
-    selectors.isElementDisabled(state, DataElements.MODEL3D_MODAL),
-    selectors.isElementOpen(state, DataElements.MODEL3D_MODAL),
+
+  const [isDisabled, isOpen] = useSelector(state => [
+    selectors.isElementDisabled(state, 'Model3DModal'),
+    selectors.isElementOpen(state, 'Model3DModal'),
   ]);
 
+  const onColorChange = selectedColor => {
+    const convertedColor = new window.Annotations.Color(
+      selectedColor.r,
+      selectedColor.g,
+      selectedColor.b,
+      selectedColor.a,
+    );
+    dispatch(actions.setCustomColor(convertedColor));
+  };
+
   const close3DModal = () => {
-    dispatch(actions.closeElement(DataElements.MODEL3D_MODAL));
+    dispatch(actions.closeElement('Model3DModal'));
     setURL('');
     setFile({});
     setError({});
@@ -34,7 +44,7 @@ function Model3DModalRedux(props) {
   // Hack to close modal if hotkey to open other tool is used.
   useEffect(() => {
     const onToolUpdated = () => {
-      dispatch(actions.closeElement(DataElements.MODEL3D_MODAL));
+      dispatch(actions.closeElement('Model3DModal'));
     };
     core.addEventListener('toolUpdated', onToolUpdated);
     return () => core.removeEventListener('toolUpdated', onToolUpdated);
@@ -43,13 +53,7 @@ function Model3DModalRedux(props) {
   useEffect(() => {
     if (isOpen) {
       urlInput.current.focus();
-      dispatch(actions.closeElements([
-        DataElements.PRINT_MODAL,
-        DataElements.LOADING_MODAL,
-        DataElements.PROGRESS_MODAL,
-        DataElements.ERROR_MODAL,
-        DataElements.OPEN_FILE_MODAL,
-      ]));
+      dispatch(actions.closeElements(['printModal', 'loadingModal', 'progressModal', 'errorModal', 'OpenFileModal']));
     }
   }, [dispatch, isOpen]);
 

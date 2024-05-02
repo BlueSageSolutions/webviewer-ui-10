@@ -3,17 +3,18 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import actions from 'actions';
 import classNames from 'classnames';
+
 import HeaderItems from 'components/HeaderItems';
-import { isMobileSize, isTabletAndMobileSize } from 'helpers/getDeviceSize';
+import useMedia from 'hooks/useMedia';
 
 import selectors from 'selectors';
 
 import './Header.scss';
 
+
 class ToolsHeader extends React.PureComponent {
   static propTypes = {
     isDisabled: PropTypes.bool,
-    isHeaderDisabled: PropTypes.bool,
     isOpen: PropTypes.bool,
     activeHeaderItems: PropTypes.array.isRequired,
     isToolGroupReorderingEnabled: PropTypes.bool,
@@ -21,8 +22,9 @@ class ToolsHeader extends React.PureComponent {
   }
 
   render() {
-    const { isDisabled, isHeaderDisabled, activeHeaderItems, isOpen, currentToolbarGroup, isToolGroupReorderingEnabled, isInDesktopOnlyMode } = this.props;
-    const isVisible = !(isDisabled || isHeaderDisabled) && isOpen && currentToolbarGroup !== 'toolbarGroup-View';
+    const { isDisabled, activeHeaderItems, isOpen, currentToolbarGroup, isToolGroupReorderingEnabled, isInDesktopOnlyMode } = this.props;
+
+    const isVisible = !isDisabled && isOpen && currentToolbarGroup !== 'toolbarGroup-View';
 
     return (
       <div
@@ -33,7 +35,7 @@ class ToolsHeader extends React.PureComponent {
         data-element="toolsHeader"
       >
         <div
-          className="MainHeader Tools"
+          className="Header Tools"
         >
           <HeaderItems items={activeHeaderItems} isToolGroupReorderingEnabled={isToolGroupReorderingEnabled} isInDesktopOnlyMode={isInDesktopOnlyMode} />
         </div>
@@ -42,10 +44,9 @@ class ToolsHeader extends React.PureComponent {
   }
 }
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   currentToolbarGroup: selectors.getCurrentToolbarGroup(state),
   isDisabled: selectors.isElementDisabled(state, 'toolsHeader'),
-  isHeaderDisabled: selectors.isElementDisabled(state, 'header'),
   isOpen: selectors.isElementOpen(state, 'toolsHeader'),
   activeHeaderItems: selectors.getToolsHeaderItems(state),
   isToolsOverlayOpen: selectors.isElementOpen(state, 'toolsOverlay'),
@@ -60,16 +61,33 @@ const mapDispatchToProps = {
   setActiveToolGroup: actions.setActiveToolGroup,
 };
 
-const ConnectedToolsHeader = connect(mapStateToProps, mapDispatchToProps)(ToolsHeader);
+// export default connect(mapStateToProps, mapDispatchToProps)(ToolsHeader) ;
 
-const connectedComponent = (props) => {
-  const isMobile = isMobileSize();
+const ConnectedToolsHeader = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ToolsHeader);
 
-  const isTabletAndMobile = isTabletAndMobileSize();
+
+export default props => {
+  const isMobile = useMedia(
+    // Media queries
+    ['(max-width: 640px)'],
+    [true],
+    // Default value
+    false,
+  );
+
+  const isTabletAndMobile = useMedia(
+    // Media queries
+    ['(max-width: 900px)'],
+    [true],
+    // Default value
+    false,
+  );
+
 
   return (
     <ConnectedToolsHeader {...props} isMobile={isMobile} isTabletAndMobile={isTabletAndMobile} />
   );
 };
-
-export default connectedComponent;

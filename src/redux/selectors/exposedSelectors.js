@@ -1,12 +1,13 @@
-import { isAndroid, isChrome } from 'helpers/device';
+import { isAndroid, isChrome, isMobile } from 'helpers/device';
 import { defaultNoteDateFormat, defaultPrintedNoteDateFormat } from 'constants/defaultTimeFormat';
-import { panelMinWidth, RESIZE_BAR_WIDTH } from 'constants/panel';
+import { panelMinWidth, RESIZE_BAR_WIDTH, panelNames } from 'constants/panel';
 import { PLACEMENT, POSITION, ITEM_TYPE } from 'constants/customizationVariables';
 import DataElements from 'constants/dataElement';
-import { getFirstToolForGroupedItems } from '../actions/exposedActions';
+import { getAllAssociatedGroupedItems, getFirstToolForGroupedItems } from '../actions/exposedActions';
 import { getNestedGroupedItems } from 'helpers/modularUIHelpers';
 
 // viewer
+export const getModularComponent = (state, dataElement) => state.viewer.modularComponents[dataElement];
 export const getScaleOverlayPosition = (state) => state.viewer.scaleOverlayPosition;
 export const getDefaultPrintMargins = (state) => state.viewer.defaultPrintMargins;
 export const getColors = (state, tool, type) => {
@@ -54,6 +55,7 @@ export const getLastPickedToolForGroup = (state, group) => state.viewer.lastPick
 export const getStandardStamps = (state) => state.viewer.standardStamps;
 export const getCustomStamps = (state) => state.viewer.customStamps;
 export const getSelectedStampIndex = (state) => state.viewer.selectedStampIndex;
+export const getLastSelectedStampIndex = (state) => state.viewer.lastSelectedStampIndex;
 export const getSelectedStamp = (state) => {
   const standardStamps = getStandardStamps(state);
   const customStamps = getCustomStamps(state);
@@ -94,6 +96,7 @@ export const getTextEditingPanelWidth = (state) => state.viewer.panelWidths.text
 
 export const getWatermarkPanelWidth = (state) => state.viewer.panelWidths.watermarkPanel;
 
+export const getMobilePanelSize = (state) => state.viewer.mobilePanelSize;
 export const getLeftPanelWidthWithResizeBar = (state) => state.viewer.panelWidths.leftPanel + RESIZE_BAR_WIDTH;
 export const getSearchPanelWidthWithResizeBar = (state) => state.viewer.panelWidths.searchPanel + RESIZE_BAR_WIDTH;
 export const getNotesPanelWidthWithResizeBar = (state) => state.viewer.panelWidths.notesPanel + RESIZE_BAR_WIDTH;
@@ -147,9 +150,16 @@ export const getDocumentContentContainerWidthStyle = (state) => {
 
 export const getOpenGenericPanel = (state, location) => {
   let genericPanels = state.viewer.genericPanels;
+  const panelsWithMobileVersion = [panelNames.SIGNATURE_LIST, panelNames.RUBBER_STAMP, panelNames.STYLE];
 
   if (location) {
-    genericPanels = state.viewer.genericPanels.filter((item) => item.location === location);
+    genericPanels = state.viewer.genericPanels.filter((item) => {
+      if (!isMobile()) {
+        return item.location === location;
+      }
+      // when we are on mobile, if the panel has a mobile version, we don't need to count on this panel measurement
+      return item.location === location && !panelsWithMobileVersion.includes(item.dataElement);
+    });
   }
 
   return genericPanels
@@ -463,12 +473,24 @@ export const getGroupedItemsWithSelectedTool = (state, toolName) => {
   return Object.keys(modularComponents).filter(filterGroupedItems);
 };
 
+export const getGroupedItemsOfCustomRibbon = (state, customRibbonDataElement) => {
+  const modularComponents = state.viewer.modularComponents;
+  const groupedItems = modularComponents[customRibbonDataElement]?.groupedItems || [];
+  const allAssociatedGroupedItems = getAllAssociatedGroupedItems(state, groupedItems);
+
+  return allAssociatedGroupedItems;
+};
+
 export const getRibbonItemAssociatedWithGroupedItem = (state, groupedItemDataElement) => {
   const modularComponents = state.viewer.modularComponents;
   const ribbonItems = Object.keys(modularComponents).find((component) => {
     const { type, groupedItems } = modularComponents[component];
 
-    return type === ITEM_TYPE.RIBBON_ITEM && groupedItems?.includes(groupedItemDataElement);
+    if (type === ITEM_TYPE.RIBBON_ITEM) {
+      const allGroupedItems = [...groupedItems, ...getNestedGroupedItems(state, groupedItems)];
+      return allGroupedItems?.includes(groupedItemDataElement);
+    }
+    return false;
   });
   return ribbonItems;
 };
@@ -834,6 +856,8 @@ export const getIsOfficeEditorMode = (state) => state.viewer.isOfficeEditorMode;
 export const getOfficeEditorCursorProperties = (state) => state.officeEditor.cursorProperties;
 
 export const getOfficeEditorSelectionProperties = (state) => state.officeEditor.selectionProperties;
+
+export const getOfficeEditorEditMode = (state) => state.officeEditor.editMode;
 
 export const getAvailableFontFaces = (state) => state.officeEditor.availableFontFaces;
 
